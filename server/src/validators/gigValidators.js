@@ -115,3 +115,90 @@ export const validateCreateGigInput = (payload) => {
     },
   };
 };
+
+export const validateUpdateGigInput = (payload) => {
+  const title =
+    payload.title !== undefined ? normalizeText(payload.title) : undefined;
+  const description =
+    payload.description !== undefined
+      ? normalizeText(payload.description)
+      : undefined;
+  const category =
+    payload.category !== undefined
+      ? normalizeText(payload.category)
+      : undefined;
+  const price =
+    payload.price !== undefined ? normalizeNumber(payload.price) : undefined;
+  const deliveryTime =
+    payload.deliveryTime !== undefined
+      ? normalizeNumber(payload.deliveryTime)
+      : undefined;
+
+  const errors = [];
+
+  if (title !== undefined && !title) {
+    errors.push({ field: "title", message: "Title is required." });
+  }
+
+  if (description !== undefined && !description) {
+    errors.push({ field: "description", message: "Description is required." });
+  }
+
+  if (category !== undefined) {
+    if (!category) {
+      errors.push({ field: "category", message: "Category is required." });
+    } else if (!GIG_CATEGORIES.includes(category)) {
+      errors.push({ field: "category", message: "Invalid category selected." });
+    }
+  }
+
+  if (price !== undefined && (typeof price !== "number" || price <= 0)) {
+    errors.push({
+      field: "price",
+      message: "Price must be a positive number.",
+    });
+  }
+
+  if (
+    deliveryTime !== undefined &&
+    (typeof deliveryTime !== "number" || deliveryTime <= 0)
+  ) {
+    errors.push({
+      field: "deliveryTime",
+      message: "Delivery time must be a positive number (in days).",
+    });
+  }
+
+  let tags;
+  if (
+    payload.tags !== undefined &&
+    payload.tags !== null &&
+    payload.tags !== ""
+  ) {
+    tags = normalizeTags(payload.tags);
+    if (tags === null) {
+      errors.push({
+        field: "tags",
+        message: "Tags must be an array of non-empty strings.",
+      });
+    } else if (tags.length > 10) {
+      errors.push({
+        field: "tags",
+        message: "Maximum 10 tags per gig.",
+      });
+    }
+  }
+
+  const value = {};
+  if (title !== undefined) value.title = title;
+  if (description !== undefined) value.description = description;
+  if (category !== undefined) value.category = category;
+  if (price !== undefined) value.price = price;
+  if (deliveryTime !== undefined) value.deliveryTime = deliveryTime;
+  if (tags !== undefined) value.tags = tags === null ? [] : tags;
+
+  return {
+    errors,
+    value,
+  };
+};
