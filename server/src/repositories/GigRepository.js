@@ -8,8 +8,12 @@ export const findById = (gigId) => {
   return Gig.findById(gigId);
 };
 
+export const findAll = () => {
+  return Gig.find({}).sort({ createdAt: -1 });
+};
+
 export const findByFreelancerId = (freelancerId) => {
-  return Gig.find({ freelancerId });
+  return Gig.find({ freelancerId }).sort({ createdAt: -1 });
 };
 
 export const updateById = (gigId, updateData) => {

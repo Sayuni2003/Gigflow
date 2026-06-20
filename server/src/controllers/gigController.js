@@ -1,4 +1,10 @@
-import { createGig, updateGig, deleteGig } from "../services/gigService.js";
+import {
+  createGig,
+  updateGig,
+  deleteGig,
+  getAllGigs,
+  getMyGigs as getMyGigsService,
+} from "../services/gigService.js";
 import { sendSuccess } from "../utils/sendResponse.js";
 import { GIG_CATEGORIES } from "../constants/gigCategories.js";
 
@@ -33,6 +39,24 @@ export const remove = async (req, res) => {
   return sendSuccess(res, {
     statusCode: 200,
     message: "Gig deleted successfully.",
+  });
+};
+
+export const getAll = async (req, res) => {
+  const gigs = await getAllGigs();
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    data: gigs,
+  });
+};
+
+export const getMyGigs = async (req, res) => {
+  const gigs = await getMyGigsService(req.user.userId);
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    data: gigs,
   });
 };
 

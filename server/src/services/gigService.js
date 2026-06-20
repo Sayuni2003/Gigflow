@@ -83,3 +83,13 @@ export const deleteGig = async (gigId, freelancerId) => {
 
   await gigRepository.deleteById(gigId);
 };
+
+export const getAllGigs = async () => {
+  const gigs = await gigRepository.findAll();
+  return gigs.map(formatGigResponse);
+};
+
+export const getMyGigs = async (freelancerId) => {
+  const gigs = await gigRepository.findByFreelancerId(freelancerId);
+  return gigs.map(formatGigResponse);
+};

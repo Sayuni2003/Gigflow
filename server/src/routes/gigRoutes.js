@@ -3,6 +3,8 @@ import {
   create,
   update,
   remove,
+  getAll,
+  getMyGigs,
   getCategories,
 } from "../controllers/gigController.js";
 import { authenticate } from "../middlewares/authenticate.js";
@@ -13,6 +15,15 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const gigRouter = Router();
 
 gigRouter.get("/categories", asyncHandler(getCategories));
+
+gigRouter.get("/", asyncHandler(getAll));
+
+gigRouter.get(
+  "/my-gigs",
+  authenticate,
+  authorize("FREELANCER"),
+  asyncHandler(getMyGigs),
+);
 
 gigRouter.post(
   "/",
