@@ -45,3 +45,34 @@ export const uploadImage = async (file) => {
     ]);
   }
 };
+
+export const deleteImage = async (imageUrl) => {
+  if (!imageUrl) {
+    return;
+  }
+
+  try {
+    const filePath = imageUrl.split(
+      `/storage/v1/object/public/${env.SUPABASE_BUCKET}/`,
+    )[1];
+
+    if (!filePath) {
+      return;
+    }
+
+    const { error } = await supabase.storage
+      .from(env.SUPABASE_BUCKET)
+      .remove([filePath]);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    throw new ApiError(500, "Failed to delete image from storage.", [
+      {
+        field: "image",
+        message: "Could not delete image from storage.",
+      },
+    ]);
+  }
+};

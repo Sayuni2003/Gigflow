@@ -2,7 +2,7 @@ import {
   validateCreateGigInput,
   validateUpdateGigInput,
 } from "../validators/gigValidators.js";
-import { uploadImage } from "./storageService.js";
+import { uploadImage, deleteImage } from "./storageService.js";
 import * as gigRepository from "../repositories/GigRepository.js";
 import { ApiError } from "../utils/apiError.js";
 
@@ -62,6 +62,10 @@ export const updateGig = async (gigId, payload, file, freelancerId) => {
 
   if (file) {
     const imageUrl = await uploadImage(file);
+
+    // Delete the old image from Supabase
+    await deleteImage(gig.image);
+
     updateData.image = imageUrl;
   }
 
@@ -81,6 +85,10 @@ export const deleteGig = async (gigId, freelancerId) => {
     throw new ApiError(403, "You are not authorized to modify this gig.");
   }
 
+  // Delete image from Supabase
+  await deleteImage(gig.image);
+
+  // Delete gig from MongoDB
   await gigRepository.deleteById(gigId);
 };
 
