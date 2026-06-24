@@ -2,8 +2,9 @@ import {
   createGig,
   updateGig,
   deleteGig,
-  getAllGigs,
+  getFilteredGigs,
   getMyGigs as getMyGigsService,
+  getSingleGig,
 } from "../services/gigService.js";
 import { sendSuccess } from "../utils/sendResponse.js";
 import { GIG_CATEGORIES } from "../constants/gigCategories.js";
@@ -43,11 +44,11 @@ export const remove = async (req, res) => {
 };
 
 export const getAll = async (req, res) => {
-  const gigs = await getAllGigs();
+  const result = await getFilteredGigs(req.query);
 
   return sendSuccess(res, {
     statusCode: 200,
-    data: gigs,
+    data: result,
   });
 };
 
@@ -64,5 +65,14 @@ export const getCategories = (req, res) => {
   return sendSuccess(res, {
     statusCode: 200,
     data: GIG_CATEGORIES,
+  });
+};
+
+export const getSingle = async (req, res) => {
+  const gig = await getSingleGig(req.params.id);
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    data: gig,
   });
 };

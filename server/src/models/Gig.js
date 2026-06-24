@@ -48,6 +48,12 @@ const gigSchema = new mongoose.Schema(
   },
 );
 
+gigSchema.index({
+  title: "text",
+  description: "text",
+  tags: "text",
+});
+
 const Gig = mongoose.model("Gig", gigSchema);
 
 export default Gig;

@@ -6,6 +6,7 @@ import {
   getAll,
   getMyGigs,
   getCategories,
+  getSingle,
 } from "../controllers/gigController.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { authorize } from "../middlewares/authorize.js";
@@ -24,6 +25,8 @@ gigRouter.get(
   authorize("FREELANCER"),
   asyncHandler(getMyGigs),
 );
+
+gigRouter.get("/:id", asyncHandler(getSingle));
 
 gigRouter.post(
   "/",

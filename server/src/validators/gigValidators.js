@@ -10,6 +10,18 @@ const normalizeNumber = (value) => {
   return value;
 };
 
+const normalizeQueryNumber = (value) => {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  if (Array.isArray(value)) {
+    return Number.NaN;
+  }
+
+  return Number(value);
+};
+
 const normalizeTags = (value) => {
   if (!value) {
     return [];
@@ -200,5 +212,75 @@ export const validateUpdateGigInput = (payload) => {
   return {
     errors,
     value,
+  };
+};
+
+export const validateGigFilterQuery = (query) => {
+  const allowedSorts = ["newest", "oldest", "price_asc", "price_desc"];
+
+  const q = normalizeText(query.q);
+  const category = normalizeText(query.category);
+  const sort = normalizeText(query.sort) || "newest";
+  const minPrice = normalizeQueryNumber(query.minPrice);
+  const maxPrice = normalizeQueryNumber(query.maxPrice);
+  const page = normalizeQueryNumber(query.page) ?? 1;
+  const limit = normalizeQueryNumber(query.limit) ?? 12;
+  const errors = [];
+
+  if (category && !GIG_CATEGORIES.includes(category)) {
+    errors.push({ field: "category", message: "Invalid category selected." });
+  }
+
+  if (!allowedSorts.includes(sort)) {
+    errors.push({
+      field: "sort",
+      message: "Sort must be one of: newest, oldest, price_asc, price_desc.",
+    });
+  }
+
+  if (!Number.isInteger(page) || page < 1) {
+    errors.push({ field: "page", message: "Page must be at least 1." });
+  }
+
+  if (!Number.isInteger(limit) || limit < 1) {
+    errors.push({ field: "limit", message: "Limit must be at least 1." });
+  }
+
+  if (minPrice !== undefined && (!Number.isFinite(minPrice) || minPrice < 0)) {
+    errors.push({
+      field: "minPrice",
+      message: "Minimum price must be at least 0.",
+    });
+  }
+
+  if (maxPrice !== undefined && (!Number.isFinite(maxPrice) || maxPrice < 0)) {
+    errors.push({
+      field: "maxPrice",
+      message: "Maximum price must be at least 0.",
+    });
+  }
+
+  if (
+    Number.isFinite(minPrice) &&
+    Number.isFinite(maxPrice) &&
+    maxPrice < minPrice
+  ) {
+    errors.push({
+      field: "maxPrice",
+      message: "Maximum price must be greater than or equal to minimum price.",
+    });
+  }
+
+  return {
+    errors,
+    value: {
+      q,
+      category,
+      minPrice,
+      maxPrice,
+      sort,
+      page,
+      limit,
+    },
   };
 };
