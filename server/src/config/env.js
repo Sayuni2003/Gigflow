@@ -11,9 +11,6 @@ const requiredEnvVars = [
   "JWT_REFRESH_EXPIRY",
   "NODE_ENV",
   "MONGODB_URI",
-  "SUPABASE_URL",
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "SUPABASE_BUCKET",
 ];
 
 const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
@@ -33,9 +30,6 @@ const env = {
   JWT_REFRESH_EXPIRY: process.env.JWT_REFRESH_EXPIRY,
   NODE_ENV: process.env.NODE_ENV,
   MONGODB_URI: process.env.MONGODB_URI,
-  SUPABASE_URL: process.env.SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  SUPABASE_BUCKET: process.env.SUPABASE_BUCKET,
 };
 
 export default env;
