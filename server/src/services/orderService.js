@@ -6,6 +6,13 @@ import { ApiError } from "../utils/apiError.js";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
+const FREELANCER_TRANSITIONS = {
+  [ORDER_STATUSES.PENDING_ACCEPTANCE]: [
+    ORDER_STATUSES.IN_PROGRESS,
+    ORDER_STATUSES.REJECTED,
+  ],
+};
+
 const formatOrderResponse = (order) => {
   return {
     _id: order._id,
@@ -101,10 +108,12 @@ export const updateOrderStatus = async ({ orderId, freelancerId, status }) => {
     throw new ApiError(403, "You are not authorized to update this order.");
   }
 
-  if (order.status !== ORDER_STATUSES.PENDING_ACCEPTANCE) {
+  const allowedTransitions = FREELANCER_TRANSITIONS[order.status];
+
+  if (!allowedTransitions || !allowedTransitions.includes(status)) {
     throw new ApiError(
       409,
-      "Order status can only be updated while pending acceptance.",
+      `Cannot transition order from ${order.status} to ${status}.`,
     );
   }
 
