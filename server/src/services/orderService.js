@@ -13,6 +13,10 @@ const FREELANCER_TRANSITIONS = {
   ],
 };
 
+const CLIENT_TRANSITIONS = {
+  [ORDER_STATUSES.PENDING_ACCEPTANCE]: [ORDER_STATUSES.CANCELLED],
+};
+
 const formatOrderResponse = (order) => {
   return {
     _id: order._id,
@@ -97,18 +101,28 @@ export const getSingleOrder = async ({ orderId, userId }) => {
   return formatOrderResponse(order);
 };
 
-export const updateOrderStatus = async ({ orderId, freelancerId, status }) => {
+export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
   const order = await orderRepository.getOrderById(orderId);
 
   if (!order) {
     throw new ApiError(404, "Order not found.");
   }
 
-  if (order.freelancerId.toString() !== freelancerId) {
+  let allowedTransitions;
+
+  if (role === USER_ROLES.FREELANCER) {
+    if (order.freelancerId.toString() !== userId) {
+      throw new ApiError(403, "You are not authorized to update this order.");
+    }
+    allowedTransitions = FREELANCER_TRANSITIONS[order.status];
+  } else if (role === USER_ROLES.CLIENT) {
+    if (order.clientId.toString() !== userId) {
+      throw new ApiError(403, "You are not authorized to update this order.");
+    }
+    allowedTransitions = CLIENT_TRANSITIONS[order.status];
+  } else {
     throw new ApiError(403, "You are not authorized to update this order.");
   }
-
-  const allowedTransitions = FREELANCER_TRANSITIONS[order.status];
 
   if (!allowedTransitions || !allowedTransitions.includes(status)) {
     throw new ApiError(
@@ -126,6 +140,10 @@ export const updateOrderStatus = async ({ orderId, freelancerId, status }) => {
   }
 
   if (status === ORDER_STATUSES.REJECTED) {
+    // TODO: Refund will be handled in the Payment module.
+  }
+
+  if (status === ORDER_STATUSES.CANCELLED) {
     // TODO: Refund will be handled in the Payment module.
   }
 

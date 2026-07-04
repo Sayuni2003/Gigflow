@@ -51,10 +51,16 @@ export const validateUpdateOrderStatusInput = (params = {}, payload = {}) => {
   const { errors, value } = validateGetOrderByIdInput(params);
   const status = typeof payload.status === "string" ? payload.status.trim() : "";
 
-  if (![ORDER_STATUSES.IN_PROGRESS, ORDER_STATUSES.REJECTED].includes(status)) {
+  const ALLOWED_STATUS_VALUES = [
+    ORDER_STATUSES.IN_PROGRESS,
+    ORDER_STATUSES.REJECTED,
+    ORDER_STATUSES.CANCELLED,
+  ];
+
+  if (!ALLOWED_STATUS_VALUES.includes(status)) {
     errors.push({
       field: "status",
-      message: "Status must be either IN_PROGRESS or REJECTED.",
+      message: "Status must be IN_PROGRESS, REJECTED, or CANCELLED.",
     });
   }
 

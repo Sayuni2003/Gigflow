@@ -26,7 +26,6 @@ orderRouter.get("/:orderId", authenticate, asyncHandler(getOrderById));
 orderRouter.patch(
   "/:orderId/status",
   authenticate,
-  authorize(USER_ROLES.FREELANCER),
   asyncHandler(updateOrderStatus),
 );
 

@@ -70,7 +70,8 @@ export const updateOrderStatus = async (req, res) => {
 
   const order = await updateOrderStatusService({
     orderId,
-    freelancerId: req.user.userId,
+    userId: req.user.userId,
+    role: req.user.role,
     status,
   });
 
