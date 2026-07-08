@@ -1,5 +1,7 @@
 import stripe from "../config/stripe.js";
 import env from "../config/env.js";
+import { PAYMENT_STATUSES, PLATFORM_FEE } from "../constants/payment.js";
+import * as paymentRepository from "../repositories/PaymentRepository.js";
 import * as userRepository from "../repositories/UserRepository.js";
 import { ApiError } from "../utils/apiError.js";
 
@@ -40,4 +42,60 @@ export const onboardFreelancer = async (userId) => {
   }
 
   return { url: accountLink.url };
+};
+
+export const createPaymentForOrder = async (order) => {
+  const client = await userRepository.findById(order.clientId);
+
+  if (!client) {
+    throw new ApiError(404, "Client not found.");
+  }
+
+  if (!client.stripeCustomerId) {
+    let customer;
+    try {
+      customer = await stripe.customers.create({ email: client.email });
+    } catch (err) {
+      console.error("Stripe customer creation failed:", err);
+      throw new ApiError(500, "Failed to create Stripe customer.");
+    }
+
+    client.stripeCustomerId = customer.id;
+    await userRepository.save(client);
+  }
+
+  const amount = order.gigSnapshot.price;
+  const platformFee = (amount * PLATFORM_FEE) / 100;
+  const freelancerPayout = amount - platformFee;
+
+  if (freelancerPayout <= 0) {
+    throw new ApiError(400, "Gig price must exceed the platform fee.");
+  }
+
+  let paymentIntent;
+  try {
+    paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100),
+      currency: "usd",
+      customer: client.stripeCustomerId,
+      capture_method: "manual",
+      metadata: { orderId: order._id.toString() },
+    });
+  } catch (err) {
+    console.error("Stripe PaymentIntent creation failed:", err);
+    throw new ApiError(500, "Failed to create payment intent.");
+  }
+
+  const payment = await paymentRepository.create({
+    orderId: order._id,
+    clientId: order.clientId,
+    freelancerId: order.freelancerId,
+    stripePaymentIntentId: paymentIntent.id,
+    amount,
+    platformFee,
+    freelancerPayout,
+    status: PAYMENT_STATUSES.PENDING,
+  });
+
+  return { payment, clientSecret: paymentIntent.client_secret };
 };

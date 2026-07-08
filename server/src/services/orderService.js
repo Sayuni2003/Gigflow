@@ -2,6 +2,7 @@ import { ORDER_STATUSES } from "../constants/orderStatuses.js";
 import { USER_ROLES } from "../models/User.js";
 import * as gigRepository from "../repositories/GigRepository.js";
 import * as orderRepository from "../repositories/OrderRepository.js";
+import { createPaymentForOrder } from "./paymentService.js";
 import { ApiError } from "../utils/apiError.js";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -132,11 +133,15 @@ export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
   }
 
   const updateData = { status };
+  let paymentResult = null;
 
   if (status === ORDER_STATUSES.IN_PROGRESS) {
     updateData.deliveryDeadline = buildDeliveryDeadline(
       order.gigSnapshot.deliveryTime,
     );
+    // Thrown errors here abort before orderRepository.updateOrder runs,
+    // so the order is never left IN_PROGRESS without a Payment.
+    paymentResult = await createPaymentForOrder(order);
   }
 
   if (status === ORDER_STATUSES.REJECTED) {
@@ -148,6 +153,11 @@ export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
   }
 
   const updatedOrder = await orderRepository.updateOrder(orderId, updateData);
+  const response = formatOrderResponse(updatedOrder);
 
-  return formatOrderResponse(updatedOrder);
+  if (paymentResult) {
+    response.payment = { clientSecret: paymentResult.clientSecret };
+  }
+
+  return response;
 };
