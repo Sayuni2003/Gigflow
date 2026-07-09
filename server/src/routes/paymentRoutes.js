@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { onboardFreelancerController } from "../controllers/paymentController.js";
+import {
+  getFreelancerEarningsController,
+  onboardFreelancerController,
+} from "../controllers/paymentController.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { authorize } from "../middlewares/authorize.js";
 import { USER_ROLES } from "../models/User.js";
@@ -12,6 +15,13 @@ paymentRouter.post(
   authenticate,
   authorize(USER_ROLES.FREELANCER),
   asyncHandler(onboardFreelancerController),
+);
+
+paymentRouter.get(
+  "/earnings",
+  authenticate,
+  authorize(USER_ROLES.FREELANCER),
+  asyncHandler(getFreelancerEarningsController),
 );
 
 export default paymentRouter;

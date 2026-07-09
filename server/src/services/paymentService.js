@@ -182,3 +182,14 @@ export const refundPaymentForOrder = async (order) => {
 
   return payment;
 };
+
+export const getFreelancerEarnings = async (freelancerId) => {
+  const result =
+    await paymentRepository.aggregateEarningsByFreelancer(freelancerId);
+  const earnings = result[0] || { totalEarned: 0, completedOrders: 0 };
+
+  return {
+    totalEarned: earnings.totalEarned,
+    completedOrders: earnings.completedOrders,
+  };
+};
