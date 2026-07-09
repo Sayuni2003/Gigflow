@@ -77,6 +77,35 @@ const handlePaymentCaptured = async (event) => {
   await payment.save();
 };
 
+const handleTransferCompleted = async (event) => {
+  const existing = await PaymentEvent.findOne({ stripeEventId: event.id });
+
+  if (existing) {
+    return;
+  }
+
+  const transfer = event.data.object;
+  const payment = await Payment.findOne({ stripeTransferId: transfer.id });
+
+  if (!payment) {
+    console.warn(
+      `No Payment found for Transfer ${transfer.id}; skipping event ${event.id}.`,
+    );
+    return;
+  }
+
+  await PaymentEvent.create({
+    paymentId: payment._id,
+    orderId: payment.orderId,
+    type: PAYMENT_EVENT_TYPES.TRANSFERRED,
+    amount: payment.freelancerPayout,
+    stripeEventId: event.id,
+  });
+
+  payment.status = PAYMENT_STATUSES.TRANSFERRED;
+  await payment.save();
+};
+
 export const handleStripeWebhook = async (req, res) => {
   const signature = req.headers["stripe-signature"];
 
@@ -106,6 +135,9 @@ export const handleStripeWebhook = async (req, res) => {
       break;
     case "payment_intent.succeeded":
       await handlePaymentCaptured(event);
+      break;
+    case "transfer.created":
+      await handleTransferCompleted(event);
       break;
     default:
       break;

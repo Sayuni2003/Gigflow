@@ -99,3 +99,49 @@ export const createPaymentForOrder = async (order) => {
 
   return { payment, clientSecret: paymentIntent.client_secret };
 };
+
+export const transferPayoutForOrder = async (order) => {
+  const payment = await paymentRepository.findByOrderId(order._id);
+
+  if (!payment) {
+    throw new ApiError(404, "Payment not found for this order.");
+  }
+
+  if (payment.status !== PAYMENT_STATUSES.CAPTURED) {
+    throw new ApiError(
+      409,
+      `Cannot transfer payout while payment status is ${payment.status}.`,
+    );
+  }
+
+  const freelancer = await userRepository.findById(order.freelancerId);
+
+  if (!freelancer) {
+    throw new ApiError(404, "Freelancer not found.");
+  }
+
+  if (!freelancer.payoutsEnabled) {
+    throw new ApiError(
+      400,
+      "Freelancer has not completed Stripe payout verification.",
+    );
+  }
+
+  let transfer;
+  try {
+    transfer = await stripe.transfers.create({
+      amount: Math.round(payment.freelancerPayout * 100),
+      currency: "usd",
+      destination: freelancer.stripeAccountId,
+      transfer_group: order._id.toString(),
+    });
+  } catch (err) {
+    console.error("Stripe transfer creation failed:", err);
+    throw new ApiError(500, "Failed to create payout transfer.");
+  }
+
+  payment.stripeTransferId = transfer.id;
+  await paymentRepository.save(payment);
+
+  return payment;
+};

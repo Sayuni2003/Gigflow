@@ -55,12 +55,13 @@ export const validateUpdateOrderStatusInput = (params = {}, payload = {}) => {
     ORDER_STATUSES.IN_PROGRESS,
     ORDER_STATUSES.REJECTED,
     ORDER_STATUSES.CANCELLED,
+    ORDER_STATUSES.COMPLETED,
   ];
 
   if (!ALLOWED_STATUS_VALUES.includes(status)) {
     errors.push({
       field: "status",
-      message: "Status must be IN_PROGRESS, REJECTED, or CANCELLED.",
+      message: "Status must be IN_PROGRESS, REJECTED, CANCELLED, or COMPLETED.",
     });
   }
 

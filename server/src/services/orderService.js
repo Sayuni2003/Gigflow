@@ -2,7 +2,7 @@ import { ORDER_STATUSES } from "../constants/orderStatuses.js";
 import { USER_ROLES } from "../models/User.js";
 import * as gigRepository from "../repositories/GigRepository.js";
 import * as orderRepository from "../repositories/OrderRepository.js";
-import { createPaymentForOrder } from "./paymentService.js";
+import { createPaymentForOrder, transferPayoutForOrder } from "./paymentService.js";
 import { ApiError } from "../utils/apiError.js";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -16,6 +16,7 @@ const FREELANCER_TRANSITIONS = {
 
 const CLIENT_TRANSITIONS = {
   [ORDER_STATUSES.PENDING_ACCEPTANCE]: [ORDER_STATUSES.CANCELLED],
+  [ORDER_STATUSES.IN_PROGRESS]: [ORDER_STATUSES.COMPLETED],
 };
 
 const formatOrderResponse = (order) => {
@@ -150,6 +151,13 @@ export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
 
   if (status === ORDER_STATUSES.CANCELLED) {
     // TODO: Refund will be handled in the Payment module.
+  }
+
+  if (status === ORDER_STATUSES.COMPLETED) {
+    // Thrown errors here (e.g. freelancer not payout-verified) abort before
+    // orderRepository.updateOrder runs, so the order isn't marked COMPLETED
+    // without a payout at least initiated.
+    await transferPayoutForOrder(order);
   }
 
   const updatedOrder = await orderRepository.updateOrder(orderId, updateData);
