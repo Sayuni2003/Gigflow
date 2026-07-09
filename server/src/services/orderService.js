@@ -2,7 +2,11 @@ import { ORDER_STATUSES } from "../constants/orderStatuses.js";
 import { USER_ROLES } from "../models/User.js";
 import * as gigRepository from "../repositories/GigRepository.js";
 import * as orderRepository from "../repositories/OrderRepository.js";
-import { createPaymentForOrder, transferPayoutForOrder } from "./paymentService.js";
+import {
+  createPaymentForOrder,
+  refundPaymentForOrder,
+  transferPayoutForOrder,
+} from "./paymentService.js";
 import { ApiError } from "../utils/apiError.js";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -146,11 +150,11 @@ export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
   }
 
   if (status === ORDER_STATUSES.REJECTED) {
-    // TODO: Refund will be handled in the Payment module.
+    await refundPaymentForOrder(order);
   }
 
   if (status === ORDER_STATUSES.CANCELLED) {
-    // TODO: Refund will be handled in the Payment module.
+    await refundPaymentForOrder(order);
   }
 
   if (status === ORDER_STATUSES.COMPLETED) {

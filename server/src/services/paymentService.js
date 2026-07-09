@@ -145,3 +145,40 @@ export const transferPayoutForOrder = async (order) => {
 
   return payment;
 };
+
+export const refundPaymentForOrder = async (order) => {
+  const payment = await paymentRepository.findByOrderId(order._id);
+
+  if (!payment) {
+    return;
+  }
+
+  if (payment.status === PAYMENT_STATUSES.TRANSFERRED) {
+    throw new ApiError(
+      409,
+      "Cannot refund a payment that has already been transferred to the freelancer.",
+    );
+  }
+
+  if (payment.status !== PAYMENT_STATUSES.CAPTURED) {
+    throw new ApiError(
+      409,
+      `Cannot refund a payment while its status is ${payment.status}.`,
+    );
+  }
+
+  let refund;
+  try {
+    refund = await stripe.refunds.create({
+      payment_intent: payment.stripePaymentIntentId,
+    });
+  } catch (err) {
+    console.error("Stripe refund creation failed:", err);
+    throw new ApiError(500, "Failed to create refund.");
+  }
+
+  payment.stripeRefundId = refund.id;
+  await paymentRepository.save(payment);
+
+  return payment;
+};

@@ -106,6 +106,37 @@ const handleTransferCompleted = async (event) => {
   await payment.save();
 };
 
+const handleRefundCompleted = async (event) => {
+  const existing = await PaymentEvent.findOne({ stripeEventId: event.id });
+
+  if (existing) {
+    return;
+  }
+
+  const charge = event.data.object;
+  const payment = await Payment.findOne({
+    stripePaymentIntentId: charge.payment_intent,
+  });
+
+  if (!payment) {
+    console.warn(
+      `No Payment found for PaymentIntent ${charge.payment_intent}; skipping event ${event.id}.`,
+    );
+    return;
+  }
+
+  await PaymentEvent.create({
+    paymentId: payment._id,
+    orderId: payment.orderId,
+    type: PAYMENT_EVENT_TYPES.REFUNDED,
+    amount: payment.amount,
+    stripeEventId: event.id,
+  });
+
+  payment.status = PAYMENT_STATUSES.REFUNDED;
+  await payment.save();
+};
+
 export const handleStripeWebhook = async (req, res) => {
   const signature = req.headers["stripe-signature"];
 
@@ -138,6 +169,9 @@ export const handleStripeWebhook = async (req, res) => {
       break;
     case "transfer.created":
       await handleTransferCompleted(event);
+      break;
+    case "charge.refunded":
+      await handleRefundCompleted(event);
       break;
     default:
       break;
