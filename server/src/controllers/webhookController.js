@@ -34,6 +34,47 @@ const handlePaymentAuthorized = async (event) => {
 
   payment.status = PAYMENT_STATUSES.AUTHORIZED;
   await payment.save();
+
+  try {
+    await stripe.paymentIntents.capture(payment.stripePaymentIntentId);
+  } catch (err) {
+    // TODO: handle payment_intent.payment_failed to record capture failures.
+    console.error(
+      `Stripe capture failed for PaymentIntent ${payment.stripePaymentIntentId}:`,
+      err.message,
+    );
+  }
+};
+
+const handlePaymentCaptured = async (event) => {
+  const existing = await PaymentEvent.findOne({ stripeEventId: event.id });
+
+  if (existing) {
+    return;
+  }
+
+  const paymentIntent = event.data.object;
+  const payment = await Payment.findOne({
+    stripePaymentIntentId: paymentIntent.id,
+  });
+
+  if (!payment) {
+    console.warn(
+      `No Payment found for PaymentIntent ${paymentIntent.id}; skipping event ${event.id}.`,
+    );
+    return;
+  }
+
+  await PaymentEvent.create({
+    paymentId: payment._id,
+    orderId: payment.orderId,
+    type: PAYMENT_EVENT_TYPES.CAPTURED,
+    amount: payment.amount,
+    stripeEventId: event.id,
+  });
+
+  payment.status = PAYMENT_STATUSES.CAPTURED;
+  await payment.save();
 };
 
 export const handleStripeWebhook = async (req, res) => {
@@ -62,6 +103,9 @@ export const handleStripeWebhook = async (req, res) => {
     }
     case "payment_intent.amount_capturable_updated":
       await handlePaymentAuthorized(event);
+      break;
+    case "payment_intent.succeeded":
+      await handlePaymentCaptured(event);
       break;
     default:
       break;
