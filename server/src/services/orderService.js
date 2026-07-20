@@ -2,6 +2,12 @@ import { ORDER_STATUSES } from "../constants/orderStatuses.js";
 import { USER_ROLES } from "../models/User.js";
 import * as gigRepository from "../repositories/GigRepository.js";
 import * as orderRepository from "../repositories/OrderRepository.js";
+import {
+  capturePaymentForOrder,
+  createPaymentForOrder,
+  refundPaymentForOrder,
+  transferPayoutForOrder,
+} from "./paymentService.js";
 import { ApiError } from "../utils/apiError.js";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -14,7 +20,9 @@ const FREELANCER_TRANSITIONS = {
 };
 
 const CLIENT_TRANSITIONS = {
+  [ORDER_STATUSES.PENDING_PAYMENT]: [ORDER_STATUSES.CANCELLED],
   [ORDER_STATUSES.PENDING_ACCEPTANCE]: [ORDER_STATUSES.CANCELLED],
+  [ORDER_STATUSES.IN_PROGRESS]: [ORDER_STATUSES.COMPLETED],
 };
 
 const formatOrderResponse = (order) => {
@@ -64,11 +72,23 @@ export const createOrder = async ({ gigId, clientId }) => {
     },
     freelancerId: gig.freelancerId,
     clientId,
-    status: ORDER_STATUSES.PENDING_ACCEPTANCE,
+    status: ORDER_STATUSES.PENDING_PAYMENT,
     deliveryDeadline: null,
   });
 
-  return formatOrderResponse(order);
+  let paymentResult;
+  try {
+    paymentResult = await createPaymentForOrder(order);
+  } catch (err) {
+    // Don't leave an orphaned order the client can never pay for.
+    await orderRepository.deleteOrder(order._id);
+    throw err;
+  }
+
+  const response = formatOrderResponse(order);
+  response.payment = { clientSecret: paymentResult.clientSecret };
+
+  return response;
 };
 
 export const getOrders = async ({ userId, role }) => {
@@ -137,14 +157,25 @@ export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
     updateData.deliveryDeadline = buildDeliveryDeadline(
       order.gigSnapshot.deliveryTime,
     );
+    // Thrown errors here (e.g. payment not yet AUTHORIZED) abort before
+    // orderRepository.updateOrder runs, so the order is never IN_PROGRESS
+    // without the client's funds captured (pending webhook confirmation).
+    await capturePaymentForOrder(order);
   }
 
   if (status === ORDER_STATUSES.REJECTED) {
-    // TODO: Refund will be handled in the Payment module.
+    await refundPaymentForOrder(order);
   }
 
   if (status === ORDER_STATUSES.CANCELLED) {
-    // TODO: Refund will be handled in the Payment module.
+    await refundPaymentForOrder(order);
+  }
+
+  if (status === ORDER_STATUSES.COMPLETED) {
+    // Thrown errors here (e.g. freelancer not payout-verified) abort before
+    // orderRepository.updateOrder runs, so the order isn't marked COMPLETED
+    // without a payout at least initiated.
+    await transferPayoutForOrder(order);
   }
 
   const updatedOrder = await orderRepository.updateOrder(orderId, updateData);
