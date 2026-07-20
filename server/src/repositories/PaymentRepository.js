@@ -28,6 +28,10 @@ export const findByOrderId = (orderId) => {
   return Payment.findOne({ orderId });
 };
 
+export const findByUser = (filter) => {
+  return Payment.find(filter).sort({ createdAt: -1 });
+};
+
 export const save = (paymentDoc) => {
   return paymentDoc.save();
 };

@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createOrder,
   getOrderById,
+  getOrderPayment,
   getOrders,
   updateOrderStatus,
 } from "../controllers/orderController.js";
@@ -22,6 +23,12 @@ orderRouter.post(
 orderRouter.get("/", authenticate, asyncHandler(getOrders));
 
 orderRouter.get("/:orderId", authenticate, asyncHandler(getOrderById));
+
+orderRouter.get(
+  "/:orderId/payment",
+  authenticate,
+  asyncHandler(getOrderPayment),
+);
 
 orderRouter.patch(
   "/:orderId/status",

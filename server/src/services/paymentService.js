@@ -1,9 +1,22 @@
 import stripe from "../config/stripe.js";
 import env from "../config/env.js";
 import { PAYMENT_STATUSES, PLATFORM_FEE } from "../constants/payment.js";
+import { USER_ROLES } from "../models/User.js";
 import * as paymentRepository from "../repositories/PaymentRepository.js";
 import * as userRepository from "../repositories/UserRepository.js";
 import { ApiError } from "../utils/apiError.js";
+
+const formatPaymentResponse = (payment) => {
+  return {
+    orderId: payment.orderId,
+    status: payment.status,
+    amount: payment.amount,
+    platformFee: payment.platformFee,
+    freelancerPayout: payment.freelancerPayout,
+    createdAt: payment.createdAt,
+    updatedAt: payment.updatedAt,
+  };
+};
 
 export const onboardFreelancer = async (userId) => {
   const user = await userRepository.findById(userId);
@@ -205,6 +218,39 @@ export const refundPaymentForOrder = async (order) => {
   }
 
   return payment;
+};
+
+export const getPaymentForOrder = async ({ orderId, userId }) => {
+  const payment = await paymentRepository.findByOrderId(orderId);
+
+  if (!payment) {
+    throw new ApiError(404, "Payment not found for this order.");
+  }
+
+  if (
+    payment.clientId.toString() !== userId &&
+    payment.freelancerId.toString() !== userId
+  ) {
+    throw new ApiError(403, "You are not authorized to view this payment.");
+  }
+
+  return formatPaymentResponse(payment);
+};
+
+export const getPaymentsForUser = async ({ userId, role }) => {
+  let filter;
+
+  if (role === USER_ROLES.CLIENT) {
+    filter = { clientId: userId };
+  } else if (role === USER_ROLES.FREELANCER) {
+    filter = { freelancerId: userId };
+  } else {
+    throw new ApiError(403, "You are not authorized to access payments.");
+  }
+
+  const payments = await paymentRepository.findByUser(filter);
+
+  return payments.map(formatPaymentResponse);
 };
 
 export const getFreelancerEarnings = async (freelancerId) => {

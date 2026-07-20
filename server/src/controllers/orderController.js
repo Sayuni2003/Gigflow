@@ -4,6 +4,7 @@ import {
   getSingleOrder,
   updateOrderStatus as updateOrderStatusService,
 } from "../services/orderService.js";
+import { getPaymentForOrder } from "../services/paymentService.js";
 import { ApiError } from "../utils/apiError.js";
 import { sendSuccess } from "../utils/sendResponse.js";
 import {
@@ -60,6 +61,21 @@ export const getOrderById = async (req, res) => {
     statusCode: 200,
     message: "Order fetched successfully.",
     data: order,
+  });
+};
+
+export const getOrderPayment = async (req, res) => {
+  const { orderId } = assertValidInput(validateGetOrderByIdInput(req.params));
+
+  const payment = await getPaymentForOrder({
+    orderId,
+    userId: req.user.userId,
+  });
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Payment status fetched successfully.",
+    data: payment,
   });
 };
 
