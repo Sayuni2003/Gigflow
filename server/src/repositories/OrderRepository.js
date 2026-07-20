@@ -12,6 +12,10 @@ export const getOrdersByUser = (filter) => {
   return Order.find(filter).sort({ createdAt: -1 });
 };
 
+export const deleteOrder = (orderId) => {
+  return Order.findByIdAndDelete(orderId);
+};
+
 export const updateOrder = (orderId, updateData) => {
   return Order.findByIdAndUpdate(
     orderId,

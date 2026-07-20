@@ -3,6 +3,7 @@ import { USER_ROLES } from "../models/User.js";
 import * as gigRepository from "../repositories/GigRepository.js";
 import * as orderRepository from "../repositories/OrderRepository.js";
 import {
+  capturePaymentForOrder,
   createPaymentForOrder,
   refundPaymentForOrder,
   transferPayoutForOrder,
@@ -19,6 +20,7 @@ const FREELANCER_TRANSITIONS = {
 };
 
 const CLIENT_TRANSITIONS = {
+  [ORDER_STATUSES.PENDING_PAYMENT]: [ORDER_STATUSES.CANCELLED],
   [ORDER_STATUSES.PENDING_ACCEPTANCE]: [ORDER_STATUSES.CANCELLED],
   [ORDER_STATUSES.IN_PROGRESS]: [ORDER_STATUSES.COMPLETED],
 };
@@ -70,11 +72,23 @@ export const createOrder = async ({ gigId, clientId }) => {
     },
     freelancerId: gig.freelancerId,
     clientId,
-    status: ORDER_STATUSES.PENDING_ACCEPTANCE,
+    status: ORDER_STATUSES.PENDING_PAYMENT,
     deliveryDeadline: null,
   });
 
-  return formatOrderResponse(order);
+  let paymentResult;
+  try {
+    paymentResult = await createPaymentForOrder(order);
+  } catch (err) {
+    // Don't leave an orphaned order the client can never pay for.
+    await orderRepository.deleteOrder(order._id);
+    throw err;
+  }
+
+  const response = formatOrderResponse(order);
+  response.payment = { clientSecret: paymentResult.clientSecret };
+
+  return response;
 };
 
 export const getOrders = async ({ userId, role }) => {
@@ -138,15 +152,15 @@ export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
   }
 
   const updateData = { status };
-  let paymentResult = null;
 
   if (status === ORDER_STATUSES.IN_PROGRESS) {
     updateData.deliveryDeadline = buildDeliveryDeadline(
       order.gigSnapshot.deliveryTime,
     );
-    // Thrown errors here abort before orderRepository.updateOrder runs,
-    // so the order is never left IN_PROGRESS without a Payment.
-    paymentResult = await createPaymentForOrder(order);
+    // Thrown errors here (e.g. payment not yet AUTHORIZED) abort before
+    // orderRepository.updateOrder runs, so the order is never IN_PROGRESS
+    // without the client's funds captured (pending webhook confirmation).
+    await capturePaymentForOrder(order);
   }
 
   if (status === ORDER_STATUSES.REJECTED) {
@@ -165,11 +179,6 @@ export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
   }
 
   const updatedOrder = await orderRepository.updateOrder(orderId, updateData);
-  const response = formatOrderResponse(updatedOrder);
 
-  if (paymentResult) {
-    response.payment = { clientSecret: paymentResult.clientSecret };
-  }
-
-  return response;
+  return formatOrderResponse(updatedOrder);
 };

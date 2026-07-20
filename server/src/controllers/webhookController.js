@@ -1,6 +1,8 @@
 import stripe from "../config/stripe.js";
 import env from "../config/env.js";
+import { ORDER_STATUSES } from "../constants/orderStatuses.js";
 import { PAYMENT_EVENT_TYPES, PAYMENT_STATUSES } from "../constants/payment.js";
+import Order from "../models/Order.js";
 import Payment from "../models/Payment.js";
 import PaymentEvent from "../models/PaymentEvent.js";
 import User from "../models/User.js";
@@ -35,15 +37,11 @@ const handlePaymentAuthorized = async (event) => {
   payment.status = PAYMENT_STATUSES.AUTHORIZED;
   await payment.save();
 
-  try {
-    await stripe.paymentIntents.capture(payment.stripePaymentIntentId);
-  } catch (err) {
-    // TODO: handle payment_intent.payment_failed to record capture failures.
-    console.error(
-      `Stripe capture failed for PaymentIntent ${payment.stripePaymentIntentId}:`,
-      err.message,
-    );
-  }
+  // Funds are secured — the order becomes visible/actionable for the freelancer.
+  await Order.findOneAndUpdate(
+    { _id: payment.orderId, status: ORDER_STATUSES.PENDING_PAYMENT },
+    { status: ORDER_STATUSES.PENDING_ACCEPTANCE },
+  );
 };
 
 const handlePaymentCaptured = async (event) => {
@@ -103,6 +101,37 @@ const handleTransferCompleted = async (event) => {
   });
 
   payment.status = PAYMENT_STATUSES.TRANSFERRED;
+  await payment.save();
+};
+
+const handlePaymentCanceled = async (event) => {
+  const existing = await PaymentEvent.findOne({ stripeEventId: event.id });
+
+  if (existing) {
+    return;
+  }
+
+  const paymentIntent = event.data.object;
+  const payment = await Payment.findOne({
+    stripePaymentIntentId: paymentIntent.id,
+  });
+
+  if (!payment) {
+    console.warn(
+      `No Payment found for PaymentIntent ${paymentIntent.id}; skipping event ${event.id}.`,
+    );
+    return;
+  }
+
+  await PaymentEvent.create({
+    paymentId: payment._id,
+    orderId: payment.orderId,
+    type: PAYMENT_EVENT_TYPES.CANCELED,
+    amount: payment.amount,
+    stripeEventId: event.id,
+  });
+
+  payment.status = PAYMENT_STATUSES.CANCELED;
   await payment.save();
 };
 
@@ -166,6 +195,9 @@ export const handleStripeWebhook = async (req, res) => {
       break;
     case "payment_intent.succeeded":
       await handlePaymentCaptured(event);
+      break;
+    case "payment_intent.canceled":
+      await handlePaymentCanceled(event);
       break;
     case "transfer.created":
       await handleTransferCompleted(event);

@@ -79,6 +79,9 @@ export const createPaymentForOrder = async (order) => {
       currency: "usd",
       customer: client.stripeCustomerId,
       capture_method: "manual",
+      // Card only: redirect-based methods (Klarna, Cash App, etc.) don't fit
+      // the manual-capture escrow flow and require a return_url to confirm.
+      payment_method_types: ["card"],
       metadata: { orderId: order._id.toString() },
     });
   } catch (err) {
@@ -98,6 +101,30 @@ export const createPaymentForOrder = async (order) => {
   });
 
   return { payment, clientSecret: paymentIntent.client_secret };
+};
+
+export const capturePaymentForOrder = async (order) => {
+  const payment = await paymentRepository.findByOrderId(order._id);
+
+  if (!payment) {
+    throw new ApiError(404, "Payment not found for this order.");
+  }
+
+  if (payment.status !== PAYMENT_STATUSES.AUTHORIZED) {
+    throw new ApiError(
+      409,
+      `Cannot capture payment while its status is ${payment.status}.`,
+    );
+  }
+
+  try {
+    await stripe.paymentIntents.capture(payment.stripePaymentIntentId);
+  } catch (err) {
+    console.error("Stripe capture failed:", err);
+    throw new ApiError(500, "Failed to capture payment.");
+  }
+
+  return payment;
 };
 
 export const transferPayoutForOrder = async (order) => {
@@ -153,32 +180,29 @@ export const refundPaymentForOrder = async (order) => {
     return;
   }
 
-  if (payment.status === PAYMENT_STATUSES.TRANSFERRED) {
+  // Already released — safe to retry the order transition.
+  if (payment.status === PAYMENT_STATUSES.CANCELED) {
+    return payment;
+  }
+
+  // Capture only happens on acceptance and cancellation is only allowed
+  // before acceptance, so the payment can only be PENDING or AUTHORIZED here.
+  if (
+    payment.status !== PAYMENT_STATUSES.PENDING &&
+    payment.status !== PAYMENT_STATUSES.AUTHORIZED
+  ) {
     throw new ApiError(
       409,
-      "Cannot refund a payment that has already been transferred to the freelancer.",
+      `Cannot cancel a payment while its status is ${payment.status}.`,
     );
   }
 
-  if (payment.status !== PAYMENT_STATUSES.CAPTURED) {
-    throw new ApiError(
-      409,
-      `Cannot refund a payment while its status is ${payment.status}.`,
-    );
-  }
-
-  let refund;
   try {
-    refund = await stripe.refunds.create({
-      payment_intent: payment.stripePaymentIntentId,
-    });
+    await stripe.paymentIntents.cancel(payment.stripePaymentIntentId);
   } catch (err) {
-    console.error("Stripe refund creation failed:", err);
-    throw new ApiError(500, "Failed to create refund.");
+    console.error("Stripe PaymentIntent cancellation failed:", err);
+    throw new ApiError(500, "Failed to release the payment hold.");
   }
-
-  payment.stripeRefundId = refund.id;
-  await paymentRepository.save(payment);
 
   return payment;
 };
