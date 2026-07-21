@@ -10,3 +10,5 @@ export const ORDER_STATUSES = {
 };
 
 export const ORDER_STATUS_VALUES = Object.values(ORDER_STATUSES);
+
+export const REVISION_LIMIT = 3;

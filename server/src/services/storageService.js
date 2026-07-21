@@ -46,6 +46,48 @@ export const uploadImage = async (file) => {
   }
 };
 
+export const uploadFile = async (file, folder) => {
+  try {
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.originalname}`;
+    const path = `${folder}/${fileName}`;
+
+    const { error } = await supabase.storage
+      .from(env.SUPABASE_BUCKET)
+      .upload(path, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false,
+      });
+
+    if (error) {
+      throw new ApiError(500, "Failed to upload file.", [
+        { field: "files", message: "Could not upload file to storage." },
+      ]);
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from(env.SUPABASE_BUCKET).getPublicUrl(path);
+
+    return {
+      url: publicUrl,
+      filename: file.originalname,
+      mimeType: file.mimetype,
+      size: file.size,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    throw new ApiError(500, "Failed to upload file.", [
+      {
+        field: "files",
+        message: "An unexpected error occurred during upload.",
+      },
+    ]);
+  }
+};
+
 export const deleteImage = async (imageUrl) => {
   if (!imageUrl) {
     return;

@@ -1,13 +1,17 @@
 import { Router } from "express";
 import {
+  acceptOrder,
   createOrder,
+  deliverOrder,
   getOrderById,
   getOrderPayment,
   getOrders,
+  requestRevision,
   updateOrderStatus,
 } from "../controllers/orderController.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { authorize } from "../middlewares/authorize.js";
+import { uploadAttachments } from "../middlewares/upload.js";
 import { USER_ROLES } from "../models/User.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -34,6 +38,28 @@ orderRouter.patch(
   "/:orderId/status",
   authenticate,
   asyncHandler(updateOrderStatus),
+);
+
+orderRouter.post(
+  "/:orderId/deliver",
+  authenticate,
+  authorize(USER_ROLES.FREELANCER),
+  uploadAttachments.array("files", 5),
+  asyncHandler(deliverOrder),
+);
+
+orderRouter.post(
+  "/:orderId/request-revision",
+  authenticate,
+  authorize(USER_ROLES.CLIENT),
+  asyncHandler(requestRevision),
+);
+
+orderRouter.post(
+  "/:orderId/accept",
+  authenticate,
+  authorize(USER_ROLES.CLIENT),
+  asyncHandler(acceptOrder),
 );
 
 export default orderRouter;

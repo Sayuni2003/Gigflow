@@ -1,5 +1,6 @@
-import { ORDER_STATUSES } from "../constants/orderStatuses.js";
+import { ORDER_STATUSES, REVISION_LIMIT } from "../constants/orderStatuses.js";
 import { USER_ROLES } from "../models/User.js";
+import * as deliveryRepository from "../repositories/DeliveryRepository.js";
 import * as gigRepository from "../repositories/GigRepository.js";
 import * as orderRepository from "../repositories/OrderRepository.js";
 import {
@@ -17,12 +18,17 @@ const FREELANCER_TRANSITIONS = {
     ORDER_STATUSES.IN_PROGRESS,
     ORDER_STATUSES.REJECTED,
   ],
+  [ORDER_STATUSES.IN_PROGRESS]: [ORDER_STATUSES.DELIVERED],
+  [ORDER_STATUSES.REVISION_REQUESTED]: [ORDER_STATUSES.DELIVERED],
 };
 
 const CLIENT_TRANSITIONS = {
   [ORDER_STATUSES.PENDING_PAYMENT]: [ORDER_STATUSES.CANCELLED],
   [ORDER_STATUSES.PENDING_ACCEPTANCE]: [ORDER_STATUSES.CANCELLED],
-  [ORDER_STATUSES.IN_PROGRESS]: [ORDER_STATUSES.COMPLETED],
+  [ORDER_STATUSES.DELIVERED]: [
+    ORDER_STATUSES.COMPLETED,
+    ORDER_STATUSES.REVISION_REQUESTED,
+  ],
 };
 
 const formatOrderResponse = (order) => {
@@ -171,14 +177,128 @@ export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
     await refundPaymentForOrder(order);
   }
 
-  if (status === ORDER_STATUSES.COMPLETED) {
-    // Thrown errors here (e.g. freelancer not payout-verified) abort before
-    // orderRepository.updateOrder runs, so the order isn't marked COMPLETED
-    // without a payout at least initiated.
-    await transferPayoutForOrder(order);
+  const updatedOrder = await orderRepository.updateOrder(orderId, updateData);
+
+  return formatOrderResponse(updatedOrder);
+};
+
+export const deliverOrder = async ({ orderId, userId, message, attachments }) => {
+  const order = await orderRepository.getOrderById(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found.");
+  }
+
+  if (order.freelancerId.toString() !== userId) {
+    throw new ApiError(403, "You are not authorized to deliver this order.");
+  }
+
+  const allowedTransitions = FREELANCER_TRANSITIONS[order.status];
+
+  if (
+    !allowedTransitions ||
+    !allowedTransitions.includes(ORDER_STATUSES.DELIVERED)
+  ) {
+    throw new ApiError(
+      409,
+      `Cannot deliver an order while its status is ${order.status}.`,
+    );
+  }
+
+  // revisionNumber is derived from how many deliveries already exist for
+  // this order, not stored/incremented anywhere on Order itself.
+  const revisionNumber = await deliveryRepository.countByOrderId(order._id);
+
+  const delivery = await deliveryRepository.createDelivery({
+    orderId: order._id,
+    submittedBy: userId,
+    message,
+    attachments,
+    revisionNumber,
+  });
+
+  const updatedOrder = await orderRepository.updateOrder(orderId, {
+    status: ORDER_STATUSES.DELIVERED,
+  });
+
+  return { order: formatOrderResponse(updatedOrder), delivery };
+};
+
+export const requestRevision = async ({ orderId, userId, message }) => {
+  const order = await orderRepository.getOrderById(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found.");
+  }
+
+  if (order.clientId.toString() !== userId) {
+    throw new ApiError(
+      403,
+      "You are not authorized to request a revision for this order.",
+    );
+  }
+
+  const allowedTransitions = CLIENT_TRANSITIONS[order.status];
+
+  if (
+    !allowedTransitions ||
+    !allowedTransitions.includes(ORDER_STATUSES.REVISION_REQUESTED)
+  ) {
+    throw new ApiError(
+      409,
+      `Cannot request a revision while order status is ${order.status}.`,
+    );
+  }
+
+  const deliveryCount = await deliveryRepository.countByOrderId(order._id);
+
+  if (deliveryCount > REVISION_LIMIT) {
+    throw new ApiError(409, "Revision cap reached.");
+  }
+
+  const updateData = { status: ORDER_STATUSES.REVISION_REQUESTED };
+
+  // Single overwritten field, not an array — a running history of revision
+  // notes belongs to the future messaging feature, not the order document.
+  if (message) {
+    updateData.lastRevisionNote = message;
   }
 
   const updatedOrder = await orderRepository.updateOrder(orderId, updateData);
 
-  return formatOrderResponse(updatedOrder);
+  return { order: formatOrderResponse(updatedOrder) };
+};
+
+export const acceptOrder = async ({ orderId, userId }) => {
+  const order = await orderRepository.getOrderById(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found.");
+  }
+
+  if (order.clientId.toString() !== userId) {
+    throw new ApiError(403, "You are not authorized to accept this order.");
+  }
+
+  const allowedTransitions = CLIENT_TRANSITIONS[order.status];
+
+  if (
+    !allowedTransitions ||
+    !allowedTransitions.includes(ORDER_STATUSES.COMPLETED)
+  ) {
+    throw new ApiError(
+      409,
+      `Cannot accept an order while its status is ${order.status}.`,
+    );
+  }
+
+  // Same abort-before-persist pattern as the generic COMPLETED transition:
+  // a failed transfer means the order never becomes COMPLETED.
+  await transferPayoutForOrder(order);
+
+  const updatedOrder = await orderRepository.updateOrder(orderId, {
+    status: ORDER_STATUSES.COMPLETED,
+  });
+
+  return { order: formatOrderResponse(updatedOrder) };
 };
