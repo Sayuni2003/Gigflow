@@ -56,6 +56,17 @@ const buildDeliveryDeadline = (deliveryTime) => {
   return new Date(Date.now() + deliveryTime * DAY_IN_MS);
 };
 
+// Shared by the client-initiated /accept endpoint and the auto-complete
+// job — both just need "release payout, mark COMPLETED" once a DELIVERED
+// order is confirmed done, whether a human or the deadline confirmed it.
+const completeOrder = async (order) => {
+  await transferPayoutForOrder(order);
+
+  return orderRepository.updateOrder(order._id, {
+    status: ORDER_STATUSES.COMPLETED,
+  });
+};
+
 export const createOrder = async ({ gigId, clientId }) => {
   const gig = await gigRepository.findById(gigId);
 
@@ -292,13 +303,25 @@ export const acceptOrder = async ({ orderId, userId }) => {
     );
   }
 
-  // Same abort-before-persist pattern as the generic COMPLETED transition:
-  // a failed transfer means the order never becomes COMPLETED.
-  await transferPayoutForOrder(order);
-
-  const updatedOrder = await orderRepository.updateOrder(orderId, {
-    status: ORDER_STATUSES.COMPLETED,
-  });
+  const updatedOrder = await completeOrder(order);
 
   return { order: formatOrderResponse(updatedOrder) };
+};
+
+export const autoCompleteExpiredDeliveries = async () => {
+  const orders = await orderRepository.findDeliveredPastDeadline();
+
+  for (const order of orders) {
+    try {
+      await completeOrder(order);
+    } catch (err) {
+      // One order's payout guard failing (e.g. freelancer not yet
+      // payout-verified) shouldn't block the rest of the batch — it'll be
+      // retried on the next poll.
+      console.error(
+        `Auto-complete failed for order ${order._id}:`,
+        err.message || err,
+      );
+    }
+  }
 };

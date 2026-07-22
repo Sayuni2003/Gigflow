@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import env from "./config/env.js";
 import { connectDatabase } from "./config/database.js";
+import { startAutoCompleteDeliveriesJob } from "./jobs/autoCompleteDeliveries.js";
 import apiRouter from "./routes/index.js";
 import webhookRouter from "./routes/webhookRoutes.js";
 import { notFoundHandler } from "./middlewares/notFound.js";
@@ -38,6 +39,8 @@ const startServer = async () => {
     app.listen(env.PORT, () => {
       console.log(`Server is running on port ${env.PORT}`);
     });
+
+    startAutoCompleteDeliveriesJob();
   } catch (error) {
     console.error("Failed to start server:", error.message || error);
     process.exit(1);
