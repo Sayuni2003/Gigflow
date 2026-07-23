@@ -6,6 +6,7 @@ import * as orderRepository from "../repositories/OrderRepository.js";
 import {
   capturePaymentForOrder,
   createPaymentForOrder,
+  issueRefundForOrder,
   refundPaymentForOrder,
   transferPayoutForOrder,
 } from "./paymentService.js";
@@ -320,6 +321,27 @@ export const autoCompleteExpiredDeliveries = async () => {
       // retried on the next poll.
       console.error(
         `Auto-complete failed for order ${order._id}:`,
+        err.message || err,
+      );
+    }
+  }
+};
+
+// A freelancer who never delivers by the deadline leaves the client's money
+// captured with nothing to show for it — refund it back automatically
+// instead of leaving the order stuck in IN_PROGRESS forever.
+export const autoRefundStalledOrders = async () => {
+  const orders = await orderRepository.findInProgressPastDeadline();
+
+  for (const order of orders) {
+    try {
+      await issueRefundForOrder(order);
+      await orderRepository.updateOrder(order._id, {
+        status: ORDER_STATUSES.CANCELLED,
+      });
+    } catch (err) {
+      console.error(
+        `Auto-refund failed for order ${order._id}:`,
         err.message || err,
       );
     }

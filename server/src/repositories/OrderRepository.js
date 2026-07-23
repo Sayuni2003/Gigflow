@@ -12,6 +12,13 @@ export const findDeliveredPastDeadline = () => {
   });
 };
 
+export const findInProgressPastDeadline = () => {
+  return Order.find({
+    status: ORDER_STATUSES.IN_PROGRESS,
+    deliveryDeadline: { $lte: new Date() },
+  });
+};
+
 export const getOrderById = (orderId) => {
   return Order.findById(orderId);
 };
