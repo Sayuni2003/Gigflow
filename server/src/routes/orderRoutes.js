@@ -9,6 +9,7 @@ import {
   requestRevision,
   updateOrderStatus,
 } from "../controllers/orderController.js";
+import { raiseDispute } from "../controllers/disputeController.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { authorize } from "../middlewares/authorize.js";
 import { uploadAttachments } from "../middlewares/upload.js";
@@ -60,6 +61,14 @@ orderRouter.post(
   authenticate,
   authorize(USER_ROLES.CLIENT),
   asyncHandler(acceptOrder),
+);
+
+orderRouter.post(
+  "/:orderId/disputes",
+  authenticate,
+  authorize(USER_ROLES.CLIENT, USER_ROLES.FREELANCER),
+  uploadAttachments.array("files", 5),
+  asyncHandler(raiseDispute),
 );
 
 export default orderRouter;
