@@ -4,6 +4,7 @@ import userRouter from "./userRoutes.js";
 import gigRouter from "./gigRoutes.js";
 import orderRouter from "./orderRoutes.js";
 import paymentRouter from "./paymentRoutes.js";
+import disputeRouter from "./disputeRoutes.js";
 
 const apiRouter = Router();
 
@@ -12,5 +13,6 @@ apiRouter.use("/users", userRouter);
 apiRouter.use("/gigs", gigRouter);
 apiRouter.use("/orders", orderRouter);
 apiRouter.use("/payments", paymentRouter);
+apiRouter.use("/disputes", disputeRouter);
 
 export default apiRouter;

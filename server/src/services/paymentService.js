@@ -220,6 +220,45 @@ export const refundPaymentForOrder = async (order) => {
   return payment;
 };
 
+export const issueRefundForOrder = async (order) => {
+  const payment = await paymentRepository.findByOrderId(order._id);
+
+  if (!payment) {
+    throw new ApiError(404, "Payment not found for this order.");
+  }
+
+  // Refund already requested — guards against double-refunding a stalled
+  // order across auto-refund poll cycles before the webhook confirms it.
+  if (payment.stripeRefundId) {
+    return payment;
+  }
+
+  // Once TRANSFERRED, the money has already reached the freelancer — that
+  // needs a clawback, which is out of scope here (same boundary as
+  // transferPayoutForOrder's CAPTURED-only guard).
+  if (payment.status !== PAYMENT_STATUSES.CAPTURED) {
+    throw new ApiError(
+      409,
+      `Cannot refund a payment while its status is ${payment.status}.`,
+    );
+  }
+
+  let refund;
+  try {
+    refund = await stripe.refunds.create({
+      payment_intent: payment.stripePaymentIntentId,
+    });
+  } catch (err) {
+    console.error("Stripe refund creation failed:", err);
+    throw new ApiError(500, "Failed to issue refund.");
+  }
+
+  payment.stripeRefundId = refund.id;
+  await paymentRepository.save(payment);
+
+  return payment;
+};
+
 export const getPaymentForOrder = async ({ orderId, userId }) => {
   const payment = await paymentRepository.findByOrderId(orderId);
 

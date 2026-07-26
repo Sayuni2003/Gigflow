@@ -60,6 +60,10 @@ const orderSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    lastRevisionNote: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

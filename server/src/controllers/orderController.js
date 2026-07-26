@@ -1,15 +1,21 @@
 import {
+  acceptOrder as acceptOrderService,
   createOrder as createOrderService,
+  deliverOrder as deliverOrderService,
   getOrders as getOrdersService,
   getSingleOrder,
+  requestRevision as requestRevisionService,
   updateOrderStatus as updateOrderStatusService,
 } from "../services/orderService.js";
 import { getPaymentForOrder } from "../services/paymentService.js";
+import { uploadFile } from "../services/storageService.js";
 import { ApiError } from "../utils/apiError.js";
 import { sendSuccess } from "../utils/sendResponse.js";
 import {
   validateCreateOrderInput,
+  validateDeliverOrderInput,
   validateGetOrderByIdInput,
+  validateRequestRevisionInput,
   validateUpdateOrderStatusInput,
 } from "../validators/orderValidators.js";
 
@@ -76,6 +82,63 @@ export const getOrderPayment = async (req, res) => {
     statusCode: 200,
     message: "Payment status fetched successfully.",
     data: payment,
+  });
+};
+
+export const deliverOrder = async (req, res) => {
+  const { orderId, message, attachments: linkAttachments } = assertValidInput(
+    validateDeliverOrderInput(req.params, req.body),
+  );
+
+  const files = req.files || [];
+  const uploadedAttachments = await Promise.all(
+    files.map((file) => uploadFile(file, "deliveries")),
+  );
+
+  const result = await deliverOrderService({
+    orderId,
+    userId: req.user.userId,
+    message,
+    attachments: [...uploadedAttachments, ...linkAttachments],
+  });
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Order delivered successfully.",
+    data: result,
+  });
+};
+
+export const requestRevision = async (req, res) => {
+  const { orderId, message } = assertValidInput(
+    validateRequestRevisionInput(req.params, req.body),
+  );
+
+  const result = await requestRevisionService({
+    orderId,
+    userId: req.user.userId,
+    message,
+  });
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Revision requested successfully.",
+    data: result,
+  });
+};
+
+export const acceptOrder = async (req, res) => {
+  const { orderId } = assertValidInput(validateGetOrderByIdInput(req.params));
+
+  const result = await acceptOrderService({
+    orderId,
+    userId: req.user.userId,
+  });
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Order accepted successfully.",
+    data: result,
   });
 };
 
