@@ -45,6 +45,18 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    stripeCustomerId: {
+      type: String,
+      default: null,
+    },
+    stripeAccountId: {
+      type: String,
+      default: null,
+    },
+    payoutsEnabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
