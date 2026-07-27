@@ -63,6 +63,35 @@ export const createRating = async ({
   }
 };
 
+export const updateRating = async ({ orderId, clientId, rating, comment }) => {
+  const existing = await ratingRepository.getRatingByOrderId(orderId);
+
+  if (!existing) {
+    throw new ApiError(404, "No rating found for this order.");
+  }
+
+  if (existing.clientId.toString() !== clientId) {
+    throw new ApiError(403, "You are not authorized to edit this rating.");
+  }
+
+  const updateData = {};
+
+  if (rating !== undefined) {
+    updateData.rating = rating;
+  }
+
+  if (comment !== undefined) {
+    updateData.comment = comment;
+  }
+
+  const updated = await ratingRepository.updateRating(
+    existing._id,
+    updateData,
+  );
+
+  return formatRatingResponse(updated);
+};
+
 export const getRatingForOrder = async ({ orderId, userId }) => {
   const order = await orderRepository.getOrderById(orderId);
 

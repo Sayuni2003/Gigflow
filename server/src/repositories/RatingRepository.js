@@ -9,6 +9,14 @@ export const getRatingByOrderId = (orderId) => {
   return Rating.findOne({ orderId });
 };
 
+export const updateRating = (ratingId, updateData) => {
+  return Rating.findByIdAndUpdate(
+    ratingId,
+    { $set: updateData },
+    { new: true, runValidators: true },
+  );
+};
+
 export const getRatingsByFreelancer = (freelancerId) => {
   return Rating.find({ freelancerId })
     .sort({ createdAt: -1 })

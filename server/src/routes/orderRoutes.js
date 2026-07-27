@@ -13,6 +13,7 @@ import { raiseDispute } from "../controllers/disputeController.js";
 import {
   createRating,
   getOrderRating,
+  updateRating,
 } from "../controllers/ratingController.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { authorize } from "../middlewares/authorize.js";
@@ -86,6 +87,13 @@ orderRouter.get(
   "/:orderId/rating",
   authenticate,
   asyncHandler(getOrderRating),
+);
+
+orderRouter.patch(
+  "/:orderId/rating",
+  authenticate,
+  authorize(USER_ROLES.CLIENT),
+  asyncHandler(updateRating),
 );
 
 export default orderRouter;
