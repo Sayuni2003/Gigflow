@@ -4,7 +4,7 @@ import ThemeToggle from "../ui/ThemeToggle";
 
 const MainLayout = ({ title, children }) => {
   return (
-    <main className="mx-auto max-w-3xl px-5 py-6">
+    <main className="mx-auto max-w-4xl px-5 py-6">
       <header className="mb-4 rounded-xl border border-border bg-bg-nav p-4">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-xl font-semibold text-text-primary">{title}</h1>

@@ -23,7 +23,7 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-bg-nav">
       <nav
-        className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3"
+        className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3"
         aria-label="Main navigation"
       >
         <Link to={ROUTES.home} className="text-lg font-bold text-primary hover:text-primary-hover">

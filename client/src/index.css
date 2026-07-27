@@ -121,8 +121,20 @@ body {
   @apply bg-bg-main text-text-primary m-0 transition-colors duration-200;
 }
 
-a {
-  @apply text-primary hover:text-primary-hover;
+@layer base {
+  /*
+   * Tailwind v4's Preflight resets border-color to currentColor globally,
+   * not to any theme token — without this, every bare `border` utility
+   * (shadcn's Card, Input, etc. all use one) renders black/dark instead
+   * of the intended border color.
+   */
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  a {
+    @apply text-primary hover:text-primary-hover;
+  }
 }
 
 /* Animations */

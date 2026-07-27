@@ -5,3 +5,8 @@ export const AUTH_ENDPOINTS = {
   refresh: "/auth/refresh",
   logout: "/auth/logout",
 };
+
+export const GIG_ENDPOINTS = {
+  base: "/gigs",
+  categories: "/gigs/categories",
+};
