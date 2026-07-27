@@ -17,6 +17,10 @@ export const updateRating = (ratingId, updateData) => {
   );
 };
 
+export const deleteRating = (ratingId) => {
+  return Rating.findByIdAndDelete(ratingId);
+};
+
 export const getRatingsByFreelancer = (freelancerId) => {
   return Rating.find({ freelancerId })
     .sort({ createdAt: -1 })

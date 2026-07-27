@@ -92,6 +92,20 @@ export const updateRating = async ({ orderId, clientId, rating, comment }) => {
   return formatRatingResponse(updated);
 };
 
+export const deleteRating = async ({ orderId, clientId }) => {
+  const existing = await ratingRepository.getRatingByOrderId(orderId);
+
+  if (!existing) {
+    throw new ApiError(404, "No rating found for this order.");
+  }
+
+  if (existing.clientId.toString() !== clientId) {
+    throw new ApiError(403, "You are not authorized to delete this rating.");
+  }
+
+  await ratingRepository.deleteRating(existing._id);
+};
+
 export const getRatingForOrder = async ({ orderId, userId }) => {
   const order = await orderRepository.getOrderById(orderId);
 

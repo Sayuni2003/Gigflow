@@ -1,5 +1,6 @@
 import {
   createRating as createRatingService,
+  deleteRating as deleteRatingService,
   getFreelancerRatings as getFreelancerRatingsService,
   getRatingForOrder as getRatingForOrderService,
   updateRating as updateRatingService,
@@ -56,6 +57,22 @@ export const updateRating = async (req, res) => {
     statusCode: 200,
     message: "Rating updated successfully.",
     data: result,
+  });
+};
+
+export const deleteRating = async (req, res) => {
+  const { orderId } = assertValidInput(
+    validateGetOrderRatingInput(req.params),
+  );
+
+  await deleteRatingService({
+    orderId,
+    clientId: req.user.userId,
+  });
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Rating deleted successfully.",
   });
 };
 

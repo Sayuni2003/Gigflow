@@ -12,6 +12,7 @@ import {
 import { raiseDispute } from "../controllers/disputeController.js";
 import {
   createRating,
+  deleteRating,
   getOrderRating,
   updateRating,
 } from "../controllers/ratingController.js";
@@ -94,6 +95,13 @@ orderRouter.patch(
   authenticate,
   authorize(USER_ROLES.CLIENT),
   asyncHandler(updateRating),
+);
+
+orderRouter.delete(
+  "/:orderId/rating",
+  authenticate,
+  authorize(USER_ROLES.CLIENT),
+  asyncHandler(deleteRating),
 );
 
 export default orderRouter;
