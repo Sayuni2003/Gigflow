@@ -12,6 +12,7 @@ import { authorize } from "../middlewares/authorize.js";
 import { requireOwner } from "../middlewares/requireOwner.js";
 import { USER_ROLES } from "../models/User.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { getFreelancerRatings } from "../controllers/ratingController.js";
 
 const userRouter = Router();
 
@@ -21,6 +22,8 @@ userRouter.get(
   authorize(USER_ROLES.ADMIN),
   asyncHandler(getUsers),
 );
+
+userRouter.get("/:userId/ratings", asyncHandler(getFreelancerRatings));
 userRouter.get(
   "/:userId",
   authenticate,

@@ -10,6 +10,7 @@ import {
   updateOrderStatus,
 } from "../controllers/orderController.js";
 import { raiseDispute } from "../controllers/disputeController.js";
+import { createRating } from "../controllers/ratingController.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { authorize } from "../middlewares/authorize.js";
 import { uploadAttachments } from "../middlewares/upload.js";
@@ -69,6 +70,13 @@ orderRouter.post(
   authorize(USER_ROLES.CLIENT, USER_ROLES.FREELANCER),
   uploadAttachments.array("files", 5),
   asyncHandler(raiseDispute),
+);
+
+orderRouter.post(
+  "/:orderId/rating",
+  authenticate,
+  authorize(USER_ROLES.CLIENT),
+  asyncHandler(createRating),
 );
 
 export default orderRouter;
