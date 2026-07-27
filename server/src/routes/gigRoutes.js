@@ -7,6 +7,7 @@ import {
   getMyGigs,
   getCategories,
   getSingle,
+  getFreelancer,
 } from "../controllers/gigController.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { authorize } from "../middlewares/authorize.js";
@@ -27,6 +28,8 @@ gigRouter.get(
 );
 
 gigRouter.get("/:id", asyncHandler(getSingle));
+
+gigRouter.get("/:id/freelancer", asyncHandler(getFreelancer));
 
 gigRouter.post(
   "/",

@@ -21,6 +21,10 @@ export const findById = (gigId) => {
   return Gig.findById(gigId);
 };
 
+export const findByIdWithFreelancer = (gigId) => {
+  return Gig.findById(gigId).populate("freelancerId", "fullName");
+};
+
 export const findWithFilters = async ({
   q,
   category,

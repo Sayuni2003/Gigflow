@@ -135,3 +135,16 @@ export const getSingleGig = async (gigId) => {
 
   return formatGigResponse(gig);
 };
+
+export const getGigFreelancer = async (gigId) => {
+  const gig = await gigRepository.findByIdWithFreelancer(gigId);
+
+  if (!gig) {
+    throw new ApiError(404, "Gig not found.");
+  }
+
+  return {
+    freelancerId: gig.freelancerId._id,
+    fullName: gig.freelancerId.fullName,
+  };
+};
