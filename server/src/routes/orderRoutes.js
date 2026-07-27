@@ -4,6 +4,8 @@ import {
   createOrder,
   deliverOrder,
   getOrderById,
+  getOrderClient,
+  getOrderFreelancer,
   getOrderPayment,
   getOrders,
   requestRevision,
@@ -33,6 +35,20 @@ orderRouter.get(
   "/:orderId/payment",
   authenticate,
   asyncHandler(getOrderPayment),
+);
+
+orderRouter.get(
+  "/:orderId/client",
+  authenticate,
+  authorize(USER_ROLES.FREELANCER),
+  asyncHandler(getOrderClient),
+);
+
+orderRouter.get(
+  "/:orderId/freelancer",
+  authenticate,
+  authorize(USER_ROLES.CLIENT),
+  asyncHandler(getOrderFreelancer),
 );
 
 orderRouter.patch(

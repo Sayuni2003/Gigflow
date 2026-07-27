@@ -5,6 +5,7 @@ import {
   getFilteredGigs,
   getMyGigs as getMyGigsService,
   getSingleGig,
+  getGigFreelancer,
 } from "../services/gigService.js";
 import { sendSuccess } from "../utils/sendResponse.js";
 import { GIG_CATEGORIES } from "../constants/gigCategories.js";
@@ -74,5 +75,14 @@ export const getSingle = async (req, res) => {
   return sendSuccess(res, {
     statusCode: 200,
     data: gig,
+  });
+};
+
+export const getFreelancer = async (req, res) => {
+  const freelancer = await getGigFreelancer(req.params.id);
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    data: freelancer,
   });
 };
