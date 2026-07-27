@@ -5,6 +5,10 @@ export const createRating = (ratingData) => {
   return Rating.create(ratingData);
 };
 
+export const getRatingByOrderId = (orderId) => {
+  return Rating.findOne({ orderId });
+};
+
 export const getRatingsByFreelancer = (freelancerId) => {
   return Rating.find({ freelancerId })
     .sort({ createdAt: -1 })

@@ -45,6 +45,22 @@ export const validateCreateRatingInput = (params = {}, payload = {}) => {
   };
 };
 
+export const validateGetOrderRatingInput = (params = {}) => {
+  const errors = [];
+  const orderId =
+    typeof params.orderId === "string" ? params.orderId.trim() : "";
+  const orderIdError = validateObjectId("orderId", orderId);
+
+  if (orderIdError) {
+    errors.push(orderIdError);
+  }
+
+  return {
+    errors,
+    value: { orderId },
+  };
+};
+
 export const validateGetFreelancerRatingsInput = (params = {}) => {
   const errors = [];
   const freelancerId =

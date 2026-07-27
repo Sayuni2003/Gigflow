@@ -1,12 +1,14 @@
 import {
   createRating as createRatingService,
   getFreelancerRatings as getFreelancerRatingsService,
+  getRatingForOrder as getRatingForOrderService,
 } from "../services/ratingService.js";
 import { ApiError } from "../utils/apiError.js";
 import { sendSuccess } from "../utils/sendResponse.js";
 import {
   validateCreateRatingInput,
   validateGetFreelancerRatingsInput,
+  validateGetOrderRatingInput,
 } from "../validators/ratingValidators.js";
 
 const assertValidInput = ({ errors, value }) => {
@@ -32,6 +34,23 @@ export const createRating = async (req, res) => {
   return sendSuccess(res, {
     statusCode: 201,
     message: "Rating submitted successfully.",
+    data: result,
+  });
+};
+
+export const getOrderRating = async (req, res) => {
+  const { orderId } = assertValidInput(
+    validateGetOrderRatingInput(req.params),
+  );
+
+  const result = await getRatingForOrderService({
+    orderId,
+    userId: req.user.userId,
+  });
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Rating fetched successfully.",
     data: result,
   });
 };

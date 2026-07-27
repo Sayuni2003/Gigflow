@@ -10,7 +10,10 @@ import {
   updateOrderStatus,
 } from "../controllers/orderController.js";
 import { raiseDispute } from "../controllers/disputeController.js";
-import { createRating } from "../controllers/ratingController.js";
+import {
+  createRating,
+  getOrderRating,
+} from "../controllers/ratingController.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { authorize } from "../middlewares/authorize.js";
 import { uploadAttachments } from "../middlewares/upload.js";
@@ -77,6 +80,12 @@ orderRouter.post(
   authenticate,
   authorize(USER_ROLES.CLIENT),
   asyncHandler(createRating),
+);
+
+orderRouter.get(
+  "/:orderId/rating",
+  authenticate,
+  asyncHandler(getOrderRating),
 );
 
 export default orderRouter;
