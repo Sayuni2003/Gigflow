@@ -4,6 +4,9 @@ import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../hooks/useAuth";
 import { AUTH_PUBLIC_REGISTER_ROLES, ROUTES } from "../utils/constants";
 
+const inputClass =
+  "rounded-lg border border-border bg-bg-card px-3 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary";
+
 const RegisterPage = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -40,10 +43,11 @@ const RegisterPage = () => {
 
   return (
     <MainLayout title="Register">
-      <form className="grid" onSubmit={handleSubmit}>
-        <label>
+      <form className="grid gap-3" onSubmit={handleSubmit}>
+        <label className="grid gap-1 text-sm text-text-secondary">
           Name
           <input
+            className={inputClass}
             name="fullName"
             type="text"
             value={form.fullName}
@@ -51,9 +55,10 @@ const RegisterPage = () => {
             required
           />
         </label>
-        <label>
+        <label className="grid gap-1 text-sm text-text-secondary">
           Email
           <input
+            className={inputClass}
             name="email"
             type="email"
             value={form.email}
@@ -61,9 +66,10 @@ const RegisterPage = () => {
             required
           />
         </label>
-        <label>
+        <label className="grid gap-1 text-sm text-text-secondary">
           Password
           <input
+            className={inputClass}
             name="password"
             type="password"
             value={form.password}
@@ -71,9 +77,9 @@ const RegisterPage = () => {
             required
           />
         </label>
-        <label>
+        <label className="grid gap-1 text-sm text-text-secondary">
           Role
-          <select name="role" value={form.role} onChange={handleChange}>
+          <select className={inputClass} name="role" value={form.role} onChange={handleChange}>
             {AUTH_PUBLIC_REGISTER_ROLES.map((role) => (
               <option key={role} value={role}>
                 {role}
@@ -81,9 +87,10 @@ const RegisterPage = () => {
             ))}
           </select>
         </label>
-        <label>
+        <label className="grid gap-1 text-sm text-text-secondary">
           Date of Birth
           <input
+            className={inputClass}
             name="dateOfBirth"
             type="date"
             value={form.dateOfBirth}
@@ -92,14 +99,18 @@ const RegisterPage = () => {
           />
         </label>
 
-        {error ? <p className="error">{error}</p> : null}
+        {error ? <p className="text-danger-text">{error}</p> : null}
 
-        <button className="button" type="submit" disabled={loading}>
+        <button
+          className="rounded-lg bg-primary px-4 py-2 font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-70"
+          type="submit"
+          disabled={loading}
+        >
           {loading ? "Creating..." : "Register"}
         </button>
       </form>
 
-      <p className="top-space">
+      <p className="mt-4">
         Already have an account? <Link to={ROUTES.login}>Login</Link>
       </p>
     </MainLayout>

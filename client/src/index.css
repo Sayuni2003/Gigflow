@@ -1,8 +1,116 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand — fixed across themes */
+  --color-primary:       #7F00FF;
+  --color-primary-hover: #6600CC;
+
+  /* Accent — Amber CTA, fixed across themes */
+  --color-cta:           #FFC107;
+  --color-cta-hover:     #E6AC00;
+  --color-cta-text:      #4A3500;
+
+  /* Status colors — fixed across themes */
+  --color-danger:        #FF6B6B;
+  --color-success:       #2ECC71;
+  --color-warning:       #FFA726;
+
+  /*
+   * Theme-aware tokens: each is set once here for light mode, then
+   * re-pointed to a dark value inside `.dark` below. Components should
+   * only ever reach for these semantic names (bg-bg-main, text-text-primary,
+   * border-border, ...) — never a light/dark-specific name — so nothing
+   * needs its own `dark:` variant just to follow the active theme.
+   */
+
+  /* Backgrounds */
+  --color-bg-main: #FAF7FF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-soft: #F0E5FF;
+  --color-bg-nav:  #FFFFFF;
+
+  /* Text */
+  --color-text-primary:   #1A0030;
+  --color-text-secondary: #555555;
+  --color-text-muted:     #999999;
+
+  /* Borders */
+  --color-border:  #E8D8FF;
+  --color-divider: #F0E8FF;
+
+  /* Role tints */
+  --color-primary-soft:  #F0E5FF;
+  --color-primary-muted: #D5B3FF;
+  --color-danger-soft:   #FFF0F0;
+  --color-danger-text:   #C0392B;
+  --color-success-soft:  #E8F5E9;
+  --color-success-text:  #1B5E20;
+  --color-warning-soft:  #FFF3CD;
+  --color-warning-text:  #4A3500;
+
+  /*
+   * shadcn/ui compatibility layer — components installed via the shadcn
+   * CLI (or pasted from shadcn docs) expect this exact set of names. Each
+   * one just points at an existing token above so there's still a single
+   * source of truth per color; nothing here needs a .dark override since
+   * var() resolves against whatever the referenced token equals on the
+   * same element at use-time.
+   */
+  --color-background:        var(--color-bg-main);
+  --color-foreground:        var(--color-text-primary);
+  --color-card:               var(--color-bg-card);
+  --color-card-foreground:    var(--color-text-primary);
+  --color-popover:            var(--color-bg-card);
+  --color-popover-foreground: var(--color-text-primary);
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary:            var(--color-bg-soft);
+  --color-secondary-foreground: var(--color-text-primary);
+  --color-muted:            var(--color-bg-soft);
+  --color-muted-foreground: var(--color-text-muted);
+  --color-accent:            var(--color-bg-soft);
+  --color-accent-foreground: var(--color-text-primary);
+  --color-destructive:            var(--color-danger);
+  --color-destructive-foreground: #FFFFFF;
+  --color-input: var(--color-border);
+  --color-ring:  var(--color-primary);
+
+  --radius:    0.625rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
 :root {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.5;
-  color: #1f2933;
-  background: #f5f7fb;
+  color-scheme: light;
+}
+
+/* Dark mode — re-point the same semantic tokens to their dark values */
+.dark {
+  color-scheme: dark;
+
+  --color-bg-main: #1C1235;
+  --color-bg-card: #130D26;
+  --color-bg-soft: #2E1A5C;
+  --color-bg-nav:  #130D26;
+
+  --color-text-primary:   #F0E8FF;
+  --color-text-secondary: #9988AA;
+  --color-text-muted:     #6655AA;
+
+  --color-border:  #3A2460;
+  --color-divider: #2E1A5C;
+
+  --color-primary-soft:  #2E1A5C;
+  --color-primary-muted: #CC99FF;
+  --color-danger-soft:   #3D0F0F;
+  --color-danger-text:   #FF8888;
+  --color-success-soft:  #0D2B0D;
+  --color-success-text:  #81C784;
+  --color-warning-soft:  #3D2D00;
+  --color-warning-text:  #FFD966;
 }
 
 * {
@@ -10,88 +118,29 @@
 }
 
 body {
-  margin: 0;
+  @apply bg-bg-main text-text-primary m-0 transition-colors duration-200;
 }
 
 a {
-  color: #1769aa;
-  text-decoration: none;
+  @apply text-primary hover:text-primary-hover;
 }
 
-a:hover {
-  text-decoration: underline;
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-.container {
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 1.25rem;
+@keyframes scale-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.card {
-  border: 1px solid #d7e0ea;
-  border-radius: 12px;
-  background: #fff;
-  padding: 1rem;
-  margin-bottom: 1rem;
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.header {
-  display: grid;
-  gap: 0.8rem;
-}
-
-.row {
-  display: flex;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-}
-
-.grid {
-  display: grid;
-  gap: 0.85rem;
-}
-
-label {
-  display: grid;
-  gap: 0.35rem;
-}
-
-input,
-select {
-  border: 1px solid #b9c8d8;
-  border-radius: 8px;
-  padding: 0.6rem 0.7rem;
-}
-
-.button {
-  border: none;
-  border-radius: 8px;
-  background: #1769aa;
-  color: #fff;
-  padding: 0.6rem 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.button.secondary {
-  background: #3b4756;
-}
-
-.button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.error {
-  color: #b42318;
-  margin: 0;
-}
-
-.muted {
-  color: #6b7280;
-}
-
-.top-space {
-  margin-top: 1rem;
-}
+.animate-fade-in  { animation: fade-in  180ms ease-out; }
+.animate-scale-in { animation: scale-in 200ms ease-out; }
+.animate-slide-up { animation: slide-up 240ms ease-out; }

@@ -28,21 +28,26 @@ const DashboardPage = () => {
   return (
     <MainLayout title="Dashboard">
       <p>This is a minimal protected route placeholder.</p>
-      <ul>
+      <ul className="mt-3 grid gap-1 text-text-secondary">
         <li>
-          <strong>Name:</strong> {user?.fullName || "-"}
+          <strong className="text-text-primary">Name:</strong> {user?.fullName || "-"}
         </li>
         <li>
-          <strong>Email:</strong> {user?.email || "-"}
+          <strong className="text-text-primary">Email:</strong> {user?.email || "-"}
         </li>
         <li>
-          <strong>Role:</strong> {user?.role || "-"}
+          <strong className="text-text-primary">Role:</strong> {user?.role || "-"}
         </li>
       </ul>
 
-      {error ? <p className="error">{error}</p> : null}
+      {error ? <p className="mt-3 text-danger-text">{error}</p> : null}
 
-      <button className="button" onClick={handleLogout} disabled={loading} type="button">
+      <button
+        className="mt-4 rounded-lg bg-primary px-4 py-2 font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-70"
+        onClick={handleLogout}
+        disabled={loading}
+        type="button"
+      >
         {loading ? "Signing out..." : "Logout"}
       </button>
     </MainLayout>

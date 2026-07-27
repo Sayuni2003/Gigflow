@@ -6,7 +6,10 @@ const NotFoundPage = () => {
   return (
     <MainLayout title="Page Not Found">
       <p>The page you requested does not exist.</p>
-      <Link className="button" to={ROUTES.home}>
+      <Link
+        className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 font-semibold text-white hover:bg-primary-hover"
+        to={ROUTES.home}
+      >
         Back to Home
       </Link>
     </MainLayout>

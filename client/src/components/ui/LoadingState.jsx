@@ -1,5 +1,5 @@
 const LoadingState = ({ label = "Loading..." }) => {
-  return <p className="muted">{label}</p>;
+  return <p className="text-text-muted">{label}</p>;
 };
 
 export default LoadingState;
