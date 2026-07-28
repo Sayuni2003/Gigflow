@@ -2,6 +2,8 @@ import {
   acceptOrder as acceptOrderService,
   createOrder as createOrderService,
   deliverOrder as deliverOrderService,
+  getOrderClientName,
+  getOrderFreelancerName,
   getOrders as getOrdersService,
   getSingleOrder,
   requestRevision as requestRevisionService,
@@ -67,6 +69,36 @@ export const getOrderById = async (req, res) => {
     statusCode: 200,
     message: "Order fetched successfully.",
     data: order,
+  });
+};
+
+export const getOrderClient = async (req, res) => {
+  const { orderId } = assertValidInput(validateGetOrderByIdInput(req.params));
+
+  const client = await getOrderClientName({
+    orderId,
+    userId: req.user.userId,
+  });
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Client fetched successfully.",
+    data: client,
+  });
+};
+
+export const getOrderFreelancer = async (req, res) => {
+  const { orderId } = assertValidInput(validateGetOrderByIdInput(req.params));
+
+  const freelancer = await getOrderFreelancerName({
+    orderId,
+    userId: req.user.userId,
+  });
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Freelancer fetched successfully.",
+    data: freelancer,
   });
 };
 

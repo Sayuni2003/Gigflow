@@ -23,6 +23,12 @@ export const getOrderById = (orderId) => {
   return Order.findById(orderId);
 };
 
+export const getOrderByIdWithParties = (orderId) => {
+  return Order.findById(orderId)
+    .populate("clientId", "fullName")
+    .populate("freelancerId", "fullName");
+};
+
 export const getOrdersByUser = (filter) => {
   return Order.find(filter).sort({ createdAt: -1 });
 };

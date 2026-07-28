@@ -46,10 +46,12 @@ const formatOrderResponse = (order) => {
   };
 };
 
+const idToString = (idOrDoc) => (idOrDoc._id ?? idOrDoc).toString();
+
 const isOrderParticipant = (order, userId) => {
   return (
-    order.clientId.toString() === userId ||
-    order.freelancerId.toString() === userId
+    idToString(order.clientId) === userId ||
+    idToString(order.freelancerId) === userId
   );
 };
 
@@ -137,6 +139,40 @@ export const getSingleOrder = async ({ orderId, userId }) => {
   }
 
   return formatOrderResponse(order);
+};
+
+export const getOrderClientName = async ({ orderId, userId }) => {
+  const order = await orderRepository.getOrderByIdWithParties(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found.");
+  }
+
+  if (idToString(order.freelancerId) !== userId) {
+    throw new ApiError(403, "You are not authorized to access this order.");
+  }
+
+  return {
+    clientId: order.clientId._id,
+    fullName: order.clientId.fullName,
+  };
+};
+
+export const getOrderFreelancerName = async ({ orderId, userId }) => {
+  const order = await orderRepository.getOrderByIdWithParties(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found.");
+  }
+
+  if (idToString(order.clientId) !== userId) {
+    throw new ApiError(403, "You are not authorized to access this order.");
+  }
+
+  return {
+    freelancerId: order.freelancerId._id,
+    fullName: order.freelancerId.fullName,
+  };
 };
 
 export const updateOrderStatus = async ({ orderId, userId, role, status }) => {
