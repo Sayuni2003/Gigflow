@@ -1,5 +1,7 @@
 import { Check } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
+import { ROUTES } from "../../utils/constants";
 
 const STEPS = [
   { title: "Freelancer posts a gig" },
@@ -34,11 +36,8 @@ const HowItWorks = () => {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button
-              type="button"
-              className="bg-primary text-primary-foreground hover:bg-primary-hover"
-            >
-              Browse gigs
+            <Button asChild className="bg-primary text-primary-foreground hover:bg-primary-hover">
+              <Link to={ROUTES.browseGigs}>Browse gigs</Link>
             </Button>
             <Button type="button" variant="outline">
               Post a gig

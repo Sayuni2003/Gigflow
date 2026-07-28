@@ -3,6 +3,7 @@ export const ROUTES = {
   login: "/login",
   register: "/register",
   dashboard: "/dashboard",
+  browseGigs: "/gigs",
 };
 
 export const ROLES = {

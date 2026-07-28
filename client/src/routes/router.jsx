@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import BrowseGigsPage from "../pages/BrowseGigsPage";
 import DashboardPage from "../pages/DashboardPage";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
@@ -11,6 +12,10 @@ export const router = createBrowserRouter([
   {
     path: ROUTES.home,
     element: <HomePage />,
+  },
+  {
+    path: ROUTES.browseGigs,
+    element: <BrowseGigsPage />,
   },
   {
     path: ROUTES.login,

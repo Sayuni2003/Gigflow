@@ -1,35 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-  Brush,
-  Code2,
-  Database,
-  Languages,
-  Megaphone,
-  Palette,
-  PenLine,
-  Smartphone,
-  Sparkles,
-  TrendingUp,
-  Video,
-} from "lucide-react";
 import { getCategories } from "../../api/gigApi";
+import { getCategoryIcon } from "../../utils/categoryIcons";
 import LoadingState from "../ui/LoadingState";
 import { Card } from "../ui/card";
-
-const CATEGORY_ICONS = {
-  "Web Development": Code2,
-  "Mobile Development": Smartphone,
-  "UI/UX Design": Palette,
-  "Graphic Design": Brush,
-  "Content Writing": PenLine,
-  "Digital Marketing": Megaphone,
-  "Video Editing": Video,
-  "Data Entry": Database,
-  Translation: Languages,
-  SEO: TrendingUp,
-};
-
-const getCategoryIcon = (name) => CATEGORY_ICONS[name] || Sparkles;
 
 const CategoryGrid = () => {
   const [categories, setCategories] = useState([]);

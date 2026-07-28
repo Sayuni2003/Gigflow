@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ArrowRight, Search, ShieldCheck } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
+import { ROUTES } from "../../utils/constants";
 
 const FREELANCERS = [
   { initials: "A", name: "Amara O.", role: "Design", match: "96%" },
@@ -12,9 +14,13 @@ const FREELANCERS = [
 
 const Hero = () => {
   const [query, setQuery] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    const trimmed = query.trim();
+    navigate(trimmed ? `${ROUTES.browseGigs}?q=${encodeURIComponent(trimmed)}` : ROUTES.browseGigs);
   };
 
   return (

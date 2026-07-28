@@ -27,6 +27,7 @@ export const findWithFilters = async ({
   tags,
   minPrice,
   maxPrice,
+  maxDeliveryDays,
   sort,
   page,
   limit,
@@ -57,6 +58,10 @@ export const findWithFilters = async ({
     if (maxPrice !== undefined) {
       filter.price.$lte = maxPrice;
     }
+  }
+
+  if (maxDeliveryDays !== undefined) {
+    filter.deliveryTime = { $lte: maxDeliveryDays };
   }
 
   const skip = (page - 1) * limit;

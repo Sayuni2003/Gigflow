@@ -137,6 +137,16 @@ body {
   }
 }
 
+/* Hides the scrollbar on an overflow-x-auto element while keeping it scrollable */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Animations */
 @keyframes fade-in {
   from { opacity: 0; }

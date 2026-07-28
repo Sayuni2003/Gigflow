@@ -223,6 +223,7 @@ export const validateGigFilterQuery = (query) => {
   const sort = normalizeText(query.sort) || "newest";
   const minPrice = normalizeQueryNumber(query.minPrice);
   const maxPrice = normalizeQueryNumber(query.maxPrice);
+  const maxDeliveryDays = normalizeQueryNumber(query.maxDeliveryDays);
   const page = normalizeQueryNumber(query.page) ?? 1;
   const limit = normalizeQueryNumber(query.limit) ?? 12;
   const errors = [];
@@ -271,6 +272,16 @@ export const validateGigFilterQuery = (query) => {
     });
   }
 
+  if (
+    maxDeliveryDays !== undefined &&
+    (!Number.isFinite(maxDeliveryDays) || maxDeliveryDays < 1)
+  ) {
+    errors.push({
+      field: "maxDeliveryDays",
+      message: "Maximum delivery days must be at least 1.",
+    });
+  }
+
   return {
     errors,
     value: {
@@ -278,6 +289,7 @@ export const validateGigFilterQuery = (query) => {
       category,
       minPrice,
       maxPrice,
+      maxDeliveryDays,
       sort,
       page,
       limit,
