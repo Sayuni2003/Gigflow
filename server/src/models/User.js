@@ -57,6 +57,19 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    bio: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    experience: {
+      type: [String],
+      default: [],
+    },
+    profilePictureUrl: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
