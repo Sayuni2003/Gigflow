@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Elements } from "@stripe/react-stripe-js";
-import { getGig, getGigFreelancer } from "../../api/gigApi";
+import { Pencil, Trash2 } from "lucide-react";
+import { deleteGig, getGig, getGigFreelancer } from "../../api/gigApi";
 import { createOrder } from "../../api/orderApi";
 import { useAuth } from "../../hooks/useAuth";
 import { stripePromise } from "../../lib/stripe";
@@ -25,6 +26,9 @@ const GigDetailsContent = () => {
   const [orderError, setOrderError] = useState("");
   const [clientSecret, setClientSecret] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -63,6 +67,7 @@ const GigDetailsContent = () => {
 
   const detailsRoute = isAuthenticated ? ROUTES.dashboardGigDetails(id) : ROUTES.gigDetails(id);
   const canOrder = !isAuthenticated || user?.role === ROLES.CLIENT;
+  const isOwner = user?.role === ROLES.FREELANCER && gig?.freelancerId === user?.id;
 
   const handleOrderClick = () => {
     setOrderError("");
@@ -98,6 +103,20 @@ const GigDetailsContent = () => {
 
   const handlePaymentSuccess = () => {
     navigate(ROUTES.clientOrders);
+  };
+
+  const handleConfirmDelete = async () => {
+    setDeleteError("");
+    setDeleting(true);
+
+    try {
+      await deleteGig(gig._id);
+      navigate(ROUTES.freelancerMyGigs);
+    } catch (err) {
+      setDeleteError(err?.response?.data?.message || "Couldn't delete this gig.");
+      setDeleting(false);
+      setDeleteConfirmOpen(false);
+    }
   };
 
   if (loading) {
@@ -157,6 +176,27 @@ const GigDetailsContent = () => {
             {orderError ? <p className="mt-2 text-sm text-danger-text">{orderError}</p> : null}
           </>
         ) : null}
+
+        {isOwner ? (
+          <div className="mt-6 flex items-center gap-2">
+            <Button asChild className="flex-1 bg-green-600 text-white hover:bg-green-700">
+              <Link to={ROUTES.freelancerGigEdit(gig._id)}>
+                <Pencil className="size-4" />
+                Edit
+              </Link>
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="flex-1 bg-red-600 hover:bg-red-700"
+              onClick={() => setDeleteConfirmOpen(true)}
+            >
+              <Trash2 className="size-4" />
+              Delete
+            </Button>
+          </div>
+        ) : null}
+        {deleteError ? <p className="mt-2 text-sm text-danger-text">{deleteError}</p> : null}
       </div>
 
       <ConfirmDialog
@@ -168,6 +208,18 @@ const GigDetailsContent = () => {
         cancelLabel="Not yet"
         loading={ordering}
         onConfirm={handleConfirmOrder}
+      />
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete this gig?"
+        description={`"${gig.title}" will be permanently removed. This cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        destructive
+        loading={deleting}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

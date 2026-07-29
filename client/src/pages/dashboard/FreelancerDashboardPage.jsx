@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ClipboardList, DollarSign, PlusCircle, Star } from "lucide-react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
+import PayoutSetupBanner from "../../components/dashboard/PayoutSetupBanner";
 import StatCard from "../../components/dashboard/StatCard";
 import { FREELANCER_NAV_ITEMS } from "../../config/dashboardNav";
 import { Button } from "../../components/ui/button";
@@ -16,6 +17,12 @@ const FreelancerDashboardPage = () => {
         Welcome back{user?.fullName ? `, ${user.fullName}` : ""}
       </h1>
       <p className="mt-1 text-text-secondary">Here&apos;s how your gigs are performing.</p>
+
+      {!user?.payoutsEnabled ? (
+        <div className="mt-6">
+          <PayoutSetupBanner />
+        </div>
+      ) : null}
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard icon={ClipboardList} label="Active gigs" value="0" />

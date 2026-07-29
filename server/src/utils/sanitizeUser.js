@@ -11,6 +11,7 @@ export const sanitizeUser = (userDoc) => {
     dateOfBirth: userDoc.dateOfBirth,
     isActive: userDoc.isActive,
     isDeleted: userDoc.isDeleted,
+    payoutsEnabled: userDoc.payoutsEnabled,
     createdAt: userDoc.createdAt,
     updatedAt: userDoc.updatedAt,
   };
