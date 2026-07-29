@@ -100,11 +100,7 @@ orderRouter.post(
   asyncHandler(createRating),
 );
 
-orderRouter.get(
-  "/:orderId/rating",
-  authenticate,
-  asyncHandler(getOrderRating),
-);
+orderRouter.get("/:orderId/rating", asyncHandler(getOrderRating));
 
 orderRouter.patch(
   "/:orderId/rating",
