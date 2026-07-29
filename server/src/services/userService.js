@@ -2,6 +2,7 @@ import * as userRepository from "../repositories/UserRepository.js";
 import { ApiError } from "../utils/apiError.js";
 import { isValidObjectId } from "../utils/objectId.js";
 import { sanitizeUser } from "../utils/sanitizeUser.js";
+import { uploadFile, deleteImage } from "./storageService.js";
 import {
   validateChangePasswordInput,
   validateProfileUpdateInput,
@@ -32,13 +33,52 @@ export const getUserProfileById = async (userId) => {
   return sanitizeUser(user);
 };
 
-export const updateUserProfile = async (userId, payload) => {
+export const updateUserProfile = async (userId, payload, file) => {
   assertValidUserId(userId);
 
   const { errors, updates } = validateProfileUpdateInput(payload);
 
   if (errors.length > 0) {
     throw new ApiError(400, "Validation failed.", errors);
+  }
+
+  const removeProfilePicture =
+    payload.removeProfilePicture === true ||
+    payload.removeProfilePicture === "true";
+
+  if (file && removeProfilePicture) {
+    throw new ApiError(400, "Validation failed.", [
+      {
+        field: "profilePicture",
+        message:
+          "Cannot upload and remove a profile picture in the same request.",
+      },
+    ]);
+  }
+
+  if (file || removeProfilePicture) {
+    const currentUser = await userRepository.findById(userId);
+
+    if (!currentUser) {
+      throw new ApiError(404, "User not found.");
+    }
+
+    if (currentUser.profilePictureUrl) {
+      await deleteImage(currentUser.profilePictureUrl);
+    }
+
+    updates.profilePictureUrl = file
+      ? (await uploadFile(file, "profile-pictures")).url
+      : null;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new ApiError(400, "Validation failed.", [
+      {
+        field: "body",
+        message: "Provide at least one valid field to update.",
+      },
+    ]);
   }
 
   const user = await userRepository.updateById(userId, updates);
