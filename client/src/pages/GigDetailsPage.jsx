@@ -1,14 +1,14 @@
-import GigBrowseContent from "../components/gigs/GigBrowseContent";
+import GigDetailsContent from "../components/gigs/GigDetailsContent";
 import Footer from "../components/layout/Footer";
 import Navbar from "../components/layout/Navbar";
 
-const BrowseGigsPage = () => {
+const GigDetailsPage = () => {
   return (
     <div className="min-h-screen bg-bg-main">
       <Navbar />
 
       <div className="mx-auto max-w-7xl px-5 py-8">
-        <GigBrowseContent />
+        <GigDetailsContent />
       </div>
 
       <Footer />
@@ -16,4 +16,4 @@ const BrowseGigsPage = () => {
   );
 };
 
-export default BrowseGigsPage;
+export default GigDetailsPage;

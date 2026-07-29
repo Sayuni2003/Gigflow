@@ -13,7 +13,7 @@ import {
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { useAuth } from "../hooks/useAuth";
-import { ROUTES } from "../utils/constants";
+import { getDashboardRoute, ROUTES } from "../utils/constants";
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -35,8 +35,8 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      await login(form);
-      navigate(location.state?.from || ROUTES.dashboard, { replace: true });
+      const loggedInUser = await login(form);
+      navigate(location.state?.from || getDashboardRoute(loggedInUser?.role), { replace: true });
     } catch (submitError) {
       setError(submitError.message);
     } finally {

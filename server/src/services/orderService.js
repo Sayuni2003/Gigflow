@@ -6,6 +6,7 @@ import * as orderRepository from "../repositories/OrderRepository.js";
 import {
   capturePaymentForOrder,
   createPaymentForOrder,
+  getResumableClientSecret,
   issueRefundForOrder,
   refundPaymentForOrder,
   transferPayoutForOrder,
@@ -79,6 +80,21 @@ export const createOrder = async ({ gigId, clientId }) => {
 
   if (gig.freelancerId.toString() === clientId) {
     throw new ApiError(403, "Clients cannot order their own gig.");
+  }
+
+  // Guard against duplicate PENDING_PAYMENT orders (e.g. a double click on
+  // "Order now") — resume the existing one instead of opening a new charge.
+  const existingOrder = await orderRepository.findPendingPaymentOrder({
+    gigId: gig._id,
+    clientId,
+  });
+
+  if (existingOrder) {
+    const clientSecret = await getResumableClientSecret(existingOrder._id);
+    const response = formatOrderResponse(existingOrder);
+    response.payment = { clientSecret };
+
+    return response;
   }
 
   const order = await orderRepository.createOrder({
