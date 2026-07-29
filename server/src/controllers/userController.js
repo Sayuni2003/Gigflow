@@ -29,7 +29,7 @@ export const getUserById = async (req, res) => {
 };
 
 export const patchUserById = async (req, res) => {
-  const user = await updateUserProfile(req.params.userId, req.body);
+  const user = await updateUserProfile(req.params.userId, req.body, req.file);
 
   return sendSuccess(res, {
     statusCode: 200,

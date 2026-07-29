@@ -10,6 +10,7 @@ import {
 import { authenticate } from "../middlewares/authenticate.js";
 import { authorize } from "../middlewares/authorize.js";
 import { requireOwner } from "../middlewares/requireOwner.js";
+import { upload } from "../middlewares/upload.js";
 import { USER_ROLES } from "../models/User.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { getFreelancerRatings } from "../controllers/ratingController.js";
@@ -34,6 +35,7 @@ userRouter.patch(
   "/:userId",
   authenticate,
   requireOwner(),
+  upload.single("profilePicture"),
   asyncHandler(patchUserById),
 );
 userRouter.patch(
