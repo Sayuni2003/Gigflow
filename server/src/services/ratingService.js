@@ -17,13 +17,6 @@ const formatRatingResponse = (rating) => ({
   createdAt: rating.createdAt,
 });
 
-const isOrderParticipant = (order, userId) => {
-  return (
-    order.clientId.toString() === userId ||
-    order.freelancerId.toString() === userId
-  );
-};
-
 export const createRating = async ({
   orderId,
   clientId,
@@ -106,15 +99,11 @@ export const deleteRating = async ({ orderId, clientId }) => {
   await ratingRepository.deleteRating(existing._id);
 };
 
-export const getRatingForOrder = async ({ orderId, userId }) => {
+export const getRatingForOrder = async ({ orderId }) => {
   const order = await orderRepository.getOrderById(orderId);
 
   if (!order) {
     throw new ApiError(404, "Order not found.");
-  }
-
-  if (!isOrderParticipant(order, userId)) {
-    throw new ApiError(403, "You are not authorized to access this order.");
   }
 
   const rating = await ratingRepository.getRatingByOrderId(orderId);

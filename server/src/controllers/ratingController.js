@@ -81,10 +81,7 @@ export const getOrderRating = async (req, res) => {
     validateGetOrderRatingInput(req.params),
   );
 
-  const result = await getRatingForOrderService({
-    orderId,
-    userId: req.user.userId,
-  });
+  const result = await getRatingForOrderService({ orderId });
 
   return sendSuccess(res, {
     statusCode: 200,
