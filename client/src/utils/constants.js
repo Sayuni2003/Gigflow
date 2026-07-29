@@ -16,6 +16,7 @@ export const ROUTES = {
   freelancerGigNew: "/dashboard/freelancer/gigs/new",
   freelancerGigEdit: (id = ":id") => `/dashboard/freelancer/gigs/${id}/edit`,
   adminDashboard: "/dashboard/admin",
+  adminDisputes: "/dashboard/admin/disputes",
   adminSettings: "/dashboard/admin/settings",
   onboardingComplete: "/onboarding/complete",
   onboardingRefresh: "/onboarding/refresh",

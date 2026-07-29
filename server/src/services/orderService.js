@@ -144,14 +144,14 @@ export const getOrders = async ({ userId, role }) => {
   return orders.map(formatOrderResponse);
 };
 
-export const getSingleOrder = async ({ orderId, userId }) => {
+export const getSingleOrder = async ({ orderId, userId, role }) => {
   const order = await orderRepository.getOrderById(orderId);
 
   if (!order) {
     throw new ApiError(404, "Order not found.");
   }
 
-  if (!isOrderParticipant(order, userId)) {
+  if (role !== USER_ROLES.ADMIN && !isOrderParticipant(order, userId)) {
     throw new ApiError(403, "You are not authorized to access this order.");
   }
 
@@ -192,14 +192,14 @@ export const getOrderFreelancerName = async ({ orderId, userId }) => {
   };
 };
 
-export const getOrderDeliveries = async ({ orderId, userId }) => {
+export const getOrderDeliveries = async ({ orderId, userId, role }) => {
   const order = await orderRepository.getOrderById(orderId);
 
   if (!order) {
     throw new ApiError(404, "Order not found.");
   }
 
-  if (!isOrderParticipant(order, userId)) {
+  if (role !== USER_ROLES.ADMIN && !isOrderParticipant(order, userId)) {
     throw new ApiError(403, "You are not authorized to access this order.");
   }
 

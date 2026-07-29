@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import BrowseGigsPage from "../pages/BrowseGigsPage";
 import DashboardPage from "../pages/DashboardPage";
 import AdminDashboardPage from "../pages/dashboard/AdminDashboardPage";
+import AdminDisputesPage from "../pages/dashboard/AdminDisputesPage";
 import AdminSettingsPage from "../pages/dashboard/AdminSettingsPage";
 import ClientDashboardPage from "../pages/dashboard/ClientDashboardPage";
 import ClientOrdersPage from "../pages/dashboard/ClientOrdersPage";
@@ -172,6 +173,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute roles={[ROLES.ADMIN]}>
         <AdminDashboardPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.adminDisputes,
+    element: (
+      <ProtectedRoute roles={[ROLES.ADMIN]}>
+        <AdminDisputesPage />
       </ProtectedRoute>
     ),
   },

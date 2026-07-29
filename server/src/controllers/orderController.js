@@ -64,6 +64,7 @@ export const getOrderById = async (req, res) => {
   const order = await getSingleOrder({
     orderId,
     userId: req.user.userId,
+    role: req.user.role,
   });
 
   return sendSuccess(res, {
@@ -109,6 +110,7 @@ export const getOrderPayment = async (req, res) => {
   const payment = await getPaymentForOrder({
     orderId,
     userId: req.user.userId,
+    role: req.user.role,
   });
 
   return sendSuccess(res, {
@@ -124,6 +126,7 @@ export const getOrderDeliveries = async (req, res) => {
   const deliveries = await getOrderDeliveriesService({
     orderId,
     userId: req.user.userId,
+    role: req.user.role,
   });
 
   return sendSuccess(res, {

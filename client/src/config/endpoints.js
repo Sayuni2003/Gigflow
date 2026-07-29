@@ -25,6 +25,13 @@ export const ORDER_ENDPOINTS = {
   deliver: (id) => `/orders/${id}/deliver`,
   requestRevision: (id) => `/orders/${id}/request-revision`,
   complete: (id) => `/orders/${id}/accept`,
+  disputes: (id) => `/orders/${id}/disputes`,
+};
+
+export const DISPUTE_ENDPOINTS = {
+  base: "/disputes",
+  byId: (id) => `/disputes/${id}`,
+  resolve: (id) => `/disputes/${id}/resolve`,
 };
 
 export const PAYMENT_ENDPOINTS = {

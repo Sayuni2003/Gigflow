@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
 import {
   completeOrder,
   getOrderById,
@@ -25,10 +25,17 @@ import {
 } from "../../utils/paymentStatus";
 import DeliverOrderDialog from "./DeliverOrderDialog";
 import DeliveryTimeline from "./DeliveryTimeline";
+import RaiseDisputeDialog from "./RaiseDisputeDialog";
 import RequestRevisionDialog from "./RequestRevisionDialog";
 
 const FREELANCER_DELIVERABLE_STATUSES = ["IN_PROGRESS", "REVISION_REQUESTED"];
 const CLIENT_ACTIONABLE_STATUSES = ["DELIVERED"];
+const DISPUTE_ELIGIBLE_STATUSES = [
+  "PENDING_ACCEPTANCE",
+  "IN_PROGRESS",
+  "DELIVERED",
+  "REVISION_REQUESTED",
+];
 
 const OrderDetailsContent = () => {
   const { id } = useParams();
@@ -47,6 +54,7 @@ const OrderDetailsContent = () => {
   const [completeOpen, setCompleteOpen] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [disputeOpen, setDisputeOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -103,6 +111,10 @@ const OrderDetailsContent = () => {
 
   const handleRevisionRequested = ({ order: updatedOrder }) => {
     setOrder(updatedOrder);
+  };
+
+  const handleDisputeRaised = () => {
+    setOrder((prev) => (prev ? { ...prev, status: "DISPUTED" } : prev));
   };
 
   const handleConfirmComplete = async () => {
@@ -180,6 +192,15 @@ const OrderDetailsContent = () => {
           <p className="mt-4 whitespace-pre-line text-text-secondary">
             {gigSnapshot?.description}
           </p>
+
+          {order.status === "DISPUTED" ? (
+            <div className="mt-4 flex items-start gap-3 rounded-xl border border-danger-text/20 bg-danger-soft p-4">
+              <AlertTriangle className="mt-0.5 size-5 shrink-0 text-danger-text" />
+              <p className="text-sm text-danger-text">
+                This order is under dispute. An admin is reviewing it and will resolve it soon.
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <div className="h-fit space-y-6 rounded-xl border border-border bg-bg-card p-6">
@@ -242,6 +263,19 @@ const OrderDetailsContent = () => {
               </Button>
             </div>
           ) : null}
+
+          {DISPUTE_ELIGIBLE_STATUSES.includes(order.status) ? (
+            <div className="border-t border-border pt-4">
+              <Button
+                variant="outline"
+                className="w-full text-danger-text hover:text-danger-text"
+                onClick={() => setDisputeOpen(true)}
+              >
+                <AlertTriangle className="size-4" />
+                Raise a dispute
+              </Button>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -264,6 +298,13 @@ const OrderDetailsContent = () => {
         onOpenChange={setRevisionOpen}
         orderId={order._id}
         onRevisionRequested={handleRevisionRequested}
+      />
+
+      <RaiseDisputeDialog
+        open={disputeOpen}
+        onOpenChange={setDisputeOpen}
+        orderId={order._id}
+        onDisputeRaised={handleDisputeRaised}
       />
 
       <ConfirmDialog

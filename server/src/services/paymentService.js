@@ -276,7 +276,7 @@ export const getResumableClientSecret = async (orderId) => {
   return paymentIntent.client_secret;
 };
 
-export const getPaymentForOrder = async ({ orderId, userId }) => {
+export const getPaymentForOrder = async ({ orderId, userId, role }) => {
   const payment = await paymentRepository.findByOrderId(orderId);
 
   if (!payment) {
@@ -284,6 +284,7 @@ export const getPaymentForOrder = async ({ orderId, userId }) => {
   }
 
   if (
+    role !== USER_ROLES.ADMIN &&
     payment.clientId.toString() !== userId &&
     payment.freelancerId.toString() !== userId
   ) {

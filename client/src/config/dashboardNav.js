@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  Briefcase,
   ClipboardList,
   CreditCard,
   DollarSign,
@@ -8,7 +7,6 @@ import {
   Search,
   Settings,
   ShoppingBag,
-  Users,
 } from "lucide-react";
 import { ROLES, ROUTES } from "../utils/constants";
 
@@ -31,9 +29,7 @@ export const FREELANCER_NAV_ITEMS = [
 
 export const ADMIN_NAV_ITEMS = [
   { label: "Overview", icon: LayoutDashboard, to: ROUTES.adminDashboard },
-  { label: "Users", icon: Users, disabled: true },
-  { label: "Gigs", icon: Briefcase, disabled: true },
-  { label: "Disputes", icon: AlertTriangle, disabled: true },
+  { label: "Disputes", icon: AlertTriangle, to: ROUTES.adminDisputes },
   { label: "Settings", icon: Settings, to: ROUTES.adminSettings },
 ];
 

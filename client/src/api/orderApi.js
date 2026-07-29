@@ -57,3 +57,9 @@ export const requestRevision = (orderId, message) => {
 export const completeOrder = (orderId) => {
   return client.post(ORDER_ENDPOINTS.complete(orderId));
 };
+
+export const raiseDispute = (orderId, formData) => {
+  return client.post(ORDER_ENDPOINTS.disputes(orderId), formData, {
+    headers: { "Content-Type": undefined },
+  });
+};
