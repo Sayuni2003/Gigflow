@@ -21,6 +21,10 @@ export const ORDER_ENDPOINTS = {
   client: (id) => `/orders/${id}/client`,
   payment: (id) => `/orders/${id}/payment`,
   status: (id) => `/orders/${id}/status`,
+  deliveries: (id) => `/orders/${id}/deliveries`,
+  deliver: (id) => `/orders/${id}/deliver`,
+  requestRevision: (id) => `/orders/${id}/request-revision`,
+  complete: (id) => `/orders/${id}/accept`,
 };
 
 export const PAYMENT_ENDPOINTS = {

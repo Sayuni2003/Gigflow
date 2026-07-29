@@ -3,6 +3,7 @@ import {
   createOrder as createOrderService,
   deliverOrder as deliverOrderService,
   getOrderClientName,
+  getOrderDeliveries as getOrderDeliveriesService,
   getOrderFreelancerName,
   getOrders as getOrdersService,
   getSingleOrder,
@@ -114,6 +115,21 @@ export const getOrderPayment = async (req, res) => {
     statusCode: 200,
     message: "Payment status fetched successfully.",
     data: payment,
+  });
+};
+
+export const getOrderDeliveries = async (req, res) => {
+  const { orderId } = assertValidInput(validateGetOrderByIdInput(req.params));
+
+  const deliveries = await getOrderDeliveriesService({
+    orderId,
+    userId: req.user.userId,
+  });
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Deliveries fetched successfully.",
+    data: deliveries,
   });
 };
 

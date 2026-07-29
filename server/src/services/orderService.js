@@ -42,6 +42,7 @@ const formatOrderResponse = (order) => {
     clientId: order.clientId,
     status: order.status,
     deliveryDeadline: order.deliveryDeadline,
+    lastRevisionNote: order.lastRevisionNote,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
   };
@@ -189,6 +190,20 @@ export const getOrderFreelancerName = async ({ orderId, userId }) => {
     freelancerId: order.freelancerId._id,
     fullName: order.freelancerId.fullName,
   };
+};
+
+export const getOrderDeliveries = async ({ orderId, userId }) => {
+  const order = await orderRepository.getOrderById(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found.");
+  }
+
+  if (!isOrderParticipant(order, userId)) {
+    throw new ApiError(403, "You are not authorized to access this order.");
+  }
+
+  return deliveryRepository.getByOrderId(orderId);
 };
 
 export const updateOrderStatus = async ({ orderId, userId, role, status }) => {

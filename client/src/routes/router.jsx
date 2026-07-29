@@ -21,6 +21,7 @@ import LoginPage from "../pages/LoginPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import OnboardingCompletePage from "../pages/OnboardingCompletePage";
 import OnboardingRefreshPage from "../pages/OnboardingRefreshPage";
+import OrderDetailsPage from "../pages/dashboard/OrderDetailsPage";
 import RegisterPage from "../pages/RegisterPage";
 import ProtectedRoute from "./ProtectedRoute";
 import { ROLES, ROUTES } from "../utils/constants";
@@ -139,6 +140,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute roles={[ROLES.FREELANCER]}>
         <FreelancerOrdersPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.orderDetails(),
+    element: (
+      <ProtectedRoute roles={[ROLES.CLIENT, ROLES.FREELANCER]}>
+        <OrderDetailsPage />
       </ProtectedRoute>
     ),
   },

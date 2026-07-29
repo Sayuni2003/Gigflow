@@ -11,6 +11,7 @@ export const ROUTES = {
   freelancerSettings: "/dashboard/freelancer/settings",
   freelancerMyGigs: "/dashboard/freelancer/gigs",
   freelancerOrders: "/dashboard/freelancer/orders",
+  orderDetails: (id = ":id") => `/dashboard/orders/${id}`,
   freelancerEarnings: "/dashboard/freelancer/earnings",
   freelancerGigNew: "/dashboard/freelancer/gigs/new",
   freelancerGigEdit: (id = ":id") => `/dashboard/freelancer/gigs/${id}/edit`,

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Elements } from "@stripe/react-stripe-js";
 import { cancelOrder, getOrderFreelancer, getOrderPayment } from "../../api/orderApi";
 import { stripePromise } from "../../lib/stripe";
+import { ROUTES } from "../../utils/constants";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import ConfirmDialog from "../ui/ConfirmDialog";
@@ -89,39 +91,41 @@ const OrderCard = ({ order }) => {
 
   return (
     <Card className="gap-0 p-0">
-      <CardContent className="grid gap-2 p-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="font-semibold text-text-primary">{gigSnapshot?.title}</h3>
-          <span
-            className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${getOrderStatusClassName(status)}`}
-          >
-            {getOrderStatusLabel(status)}
-          </span>
-        </div>
+      <Link to={ROUTES.orderDetails(_id)} className="block">
+        <CardContent className="grid gap-2 p-5">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-semibold text-text-primary">{gigSnapshot?.title}</h3>
+            <span
+              className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${getOrderStatusClassName(status)}`}
+            >
+              {getOrderStatusLabel(status)}
+            </span>
+          </div>
 
-        {freelancerName ? (
-          <p className="text-sm text-text-muted">by {freelancerName}</p>
-        ) : null}
+          {freelancerName ? (
+            <p className="text-sm text-text-muted">by {freelancerName}</p>
+          ) : null}
 
-        <p className="line-clamp-2 text-sm text-text-secondary">{gigSnapshot?.description}</p>
-      </CardContent>
+          <p className="line-clamp-2 text-sm text-text-secondary">{gigSnapshot?.description}</p>
+        </CardContent>
 
-      <CardFooter className="flex flex-wrap items-center justify-between gap-4 border-t border-border px-5 py-4">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-text-muted">Ordered</p>
-          <p className="text-sm font-semibold text-text-primary">{formatDate(createdAt)}</p>
-        </div>
-        <div>
-          <p className="text-xs uppercase tracking-wide text-text-muted">Delivery</p>
-          <p className="text-sm font-semibold text-text-primary">
-            {gigSnapshot?.deliveryTime} {gigSnapshot?.deliveryTime === 1 ? "day" : "days"}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs uppercase tracking-wide text-text-muted">Price</p>
-          <p className="text-lg font-bold text-primary">${gigSnapshot?.price}</p>
-        </div>
-      </CardFooter>
+        <CardFooter className="flex flex-wrap items-center justify-between gap-4 border-t border-border px-5 py-4">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-text-muted">Ordered</p>
+            <p className="text-sm font-semibold text-text-primary">{formatDate(createdAt)}</p>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wide text-text-muted">Delivery</p>
+            <p className="text-sm font-semibold text-text-primary">
+              {gigSnapshot?.deliveryTime} {gigSnapshot?.deliveryTime === 1 ? "day" : "days"}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs uppercase tracking-wide text-text-muted">Price</p>
+            <p className="text-lg font-bold text-primary">${gigSnapshot?.price}</p>
+          </div>
+        </CardFooter>
+      </Link>
 
       {(canPay || canCancel) && !justPaid ? (
         <div className="border-t border-border p-5">

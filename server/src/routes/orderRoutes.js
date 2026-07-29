@@ -5,6 +5,7 @@ import {
   deliverOrder,
   getOrderById,
   getOrderClient,
+  getOrderDeliveries,
   getOrderFreelancer,
   getOrderPayment,
   getOrders,
@@ -35,6 +36,12 @@ orderRouter.get(
   "/:orderId/payment",
   authenticate,
   asyncHandler(getOrderPayment),
+);
+
+orderRouter.get(
+  "/:orderId/deliveries",
+  authenticate,
+  asyncHandler(getOrderDeliveries),
 );
 
 orderRouter.get(
