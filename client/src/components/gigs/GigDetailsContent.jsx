@@ -11,6 +11,7 @@ import { ROLES, ROUTES } from "../../utils/constants";
 import { formatDate } from "../../utils/formatDate";
 import { getInitials } from "../../utils/getInitials";
 import { Badge } from "../ui/badge";
+import BackButton from "../ui/BackButton";
 import { Button } from "../ui/button";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import LoadingState from "../ui/LoadingState";
@@ -146,151 +147,155 @@ const GigDetailsContent = () => {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-      <div>
-        <div className="overflow-hidden rounded-xl border border-border bg-bg-soft">
-          <img src={gig.image} alt={gig.title} className="aspect-video w-full object-cover" />
-        </div>
+    <>
+      <BackButton className="-ml-3" />
 
-        <Badge className="mt-4 bg-cta text-cta-text">{gig.category}</Badge>
-        <h1 className="mt-3 text-3xl font-extrabold text-text-primary sm:text-4xl">{gig.title}</h1>
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-text-muted">
-          {freelancerName ? (
-            freelancerProfileRoute ? (
-              <Link
-                to={freelancerProfileRoute}
-                className="flex items-center gap-1.5 hover:text-text-primary"
-              >
-                <span className="flex size-5 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
-                  {getInitials(freelancerName)}
-                </span>
-                by {freelancerName}
-              </Link>
-            ) : (
-              <p>by {freelancerName}</p>
-            )
-          ) : null}
-          {ratings?.count > 0 ? (
-            <p className="flex items-center gap-1 text-sm">
-              <Star className="size-4 fill-current text-warning-text" />
-              <span className="font-medium text-text-primary">{ratings.average}</span>
-              <span>
-                ({ratings.count} {ratings.count === 1 ? "review" : "reviews"})
-              </span>
-            </p>
-          ) : null}
-        </div>
-
-        <p className="mt-4 whitespace-pre-line text-text-secondary">{gig.description}</p>
-
-        {gig.tags?.length > 0 ? (
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {gig.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
+      <div className="mt-4 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+        <div>
+          <div className="overflow-hidden rounded-xl border border-border bg-bg-soft">
+            <img src={gig.image} alt={gig.title} className="aspect-video w-full object-cover" />
           </div>
-        ) : null}
 
-        {ratings?.ratings?.length > 0 ? (
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold text-text-primary">Reviews</h2>
-            <div className="mt-4 space-y-4">
-              {ratings.ratings.map((entry) => (
-                <div key={entry._id} className="rounded-xl border border-border bg-bg-card p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <StarRating value={entry.rating} readOnly size="sm" />
-                    <span className="text-xs text-text-muted">{formatDate(entry.createdAt)}</span>
-                  </div>
-                  {entry.client?.fullName ? (
-                    <p className="mt-1 text-sm font-medium text-text-primary">
-                      {entry.client.fullName}
-                    </p>
-                  ) : null}
-                  {entry.comment ? (
-                    <p className="mt-1 whitespace-pre-line text-sm text-text-secondary">
-                      {entry.comment}
-                    </p>
-                  ) : null}
-                </div>
+          <Badge className="mt-4 bg-cta text-cta-text">{gig.category}</Badge>
+          <h1 className="mt-3 text-3xl font-extrabold text-text-primary sm:text-4xl">{gig.title}</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-text-muted">
+            {freelancerName ? (
+              freelancerProfileRoute ? (
+                <Link
+                  to={freelancerProfileRoute}
+                  className="flex items-center gap-1.5 hover:text-text-primary"
+                >
+                  <span className="flex size-5 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
+                    {getInitials(freelancerName)}
+                  </span>
+                  by {freelancerName}
+                </Link>
+              ) : (
+                <p>by {freelancerName}</p>
+              )
+            ) : null}
+            {ratings?.count > 0 ? (
+              <p className="flex items-center gap-1 text-sm">
+                <Star className="size-4 fill-current text-warning-text" />
+                <span className="font-medium text-text-primary">{ratings.average}</span>
+                <span>
+                  ({ratings.count} {ratings.count === 1 ? "review" : "reviews"})
+                </span>
+              </p>
+            ) : null}
+          </div>
+
+          <p className="mt-4 whitespace-pre-line text-text-secondary">{gig.description}</p>
+
+          {gig.tags?.length > 0 ? (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {gig.tags.map((tag) => (
+                <Badge key={tag} variant="secondary">
+                  {tag}
+                </Badge>
               ))}
             </div>
-          </div>
-        ) : null}
+          ) : null}
+
+          {ratings?.ratings?.length > 0 ? (
+            <div className="mt-8">
+              <h2 className="text-lg font-semibold text-text-primary">Reviews</h2>
+              <div className="mt-4 space-y-4">
+                {ratings.ratings.map((entry) => (
+                  <div key={entry._id} className="rounded-xl border border-border bg-bg-card p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <StarRating value={entry.rating} readOnly size="sm" />
+                      <span className="text-xs text-text-muted">{formatDate(entry.createdAt)}</span>
+                    </div>
+                    {entry.client?.fullName ? (
+                      <p className="mt-1 text-sm font-medium text-text-primary">
+                        {entry.client.fullName}
+                      </p>
+                    ) : null}
+                    {entry.comment ? (
+                      <p className="mt-1 whitespace-pre-line text-sm text-text-secondary">
+                        {entry.comment}
+                      </p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="h-fit rounded-xl border border-border bg-bg-card p-6">
+          <p className="text-xs uppercase tracking-wide text-text-muted">Price</p>
+          <p className="text-3xl font-bold text-primary">${gig.price}</p>
+
+          <p className="mt-4 text-xs uppercase tracking-wide text-text-muted">Delivery time</p>
+          <p className="text-lg font-semibold text-text-primary">
+            {gig.deliveryTime} {gig.deliveryTime === 1 ? "day" : "days"}
+          </p>
+
+          {canOrder && clientSecret ? (
+            <div className="mt-6">
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <CheckoutForm clientSecret={clientSecret} onSuccess={handlePaymentSuccess} />
+              </Elements>
+            </div>
+          ) : null}
+
+          {canOrder && !clientSecret ? (
+            <>
+              <Button className="mt-6 w-full" onClick={handleOrderClick} disabled={ordering}>
+                {ordering ? "Placing order..." : "Order now"}
+              </Button>
+              {orderError ? <p className="mt-2 text-sm text-danger-text">{orderError}</p> : null}
+            </>
+          ) : null}
+
+          {isOwner ? (
+            <div className="mt-6 flex items-center gap-2">
+              <Button asChild className="flex-1 bg-green-600 text-white hover:bg-green-700">
+                <Link to={ROUTES.freelancerGigEdit(gig._id)}>
+                  <Pencil className="size-4" />
+                  Edit
+                </Link>
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                className="flex-1 bg-red-600 hover:bg-red-700"
+                onClick={() => setDeleteConfirmOpen(true)}
+              >
+                <Trash2 className="size-4" />
+                Delete
+              </Button>
+            </div>
+          ) : null}
+          {deleteError ? <p className="mt-2 text-sm text-danger-text">{deleteError}</p> : null}
+        </div>
+
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title="Order this gig?"
+          description={`You're about to order "${gig.title}" for $${gig.price}. You'll be asked to pay right after.`}
+          confirmLabel="Order now"
+          cancelLabel="Not yet"
+          loading={ordering}
+          onConfirm={handleConfirmOrder}
+        />
+
+        <ConfirmDialog
+          open={deleteConfirmOpen}
+          onOpenChange={setDeleteConfirmOpen}
+          title="Delete this gig?"
+          description={`"${gig.title}" will be permanently removed. This cannot be undone.`}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          destructive
+          loading={deleting}
+          onConfirm={handleConfirmDelete}
+        />
       </div>
-
-      <div className="h-fit rounded-xl border border-border bg-bg-card p-6">
-        <p className="text-xs uppercase tracking-wide text-text-muted">Price</p>
-        <p className="text-3xl font-bold text-primary">${gig.price}</p>
-
-        <p className="mt-4 text-xs uppercase tracking-wide text-text-muted">Delivery time</p>
-        <p className="text-lg font-semibold text-text-primary">
-          {gig.deliveryTime} {gig.deliveryTime === 1 ? "day" : "days"}
-        </p>
-
-        {canOrder && clientSecret ? (
-          <div className="mt-6">
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
-              <CheckoutForm clientSecret={clientSecret} onSuccess={handlePaymentSuccess} />
-            </Elements>
-          </div>
-        ) : null}
-
-        {canOrder && !clientSecret ? (
-          <>
-            <Button className="mt-6 w-full" onClick={handleOrderClick} disabled={ordering}>
-              {ordering ? "Placing order..." : "Order now"}
-            </Button>
-            {orderError ? <p className="mt-2 text-sm text-danger-text">{orderError}</p> : null}
-          </>
-        ) : null}
-
-        {isOwner ? (
-          <div className="mt-6 flex items-center gap-2">
-            <Button asChild className="flex-1 bg-green-600 text-white hover:bg-green-700">
-              <Link to={ROUTES.freelancerGigEdit(gig._id)}>
-                <Pencil className="size-4" />
-                Edit
-              </Link>
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              className="flex-1 bg-red-600 hover:bg-red-700"
-              onClick={() => setDeleteConfirmOpen(true)}
-            >
-              <Trash2 className="size-4" />
-              Delete
-            </Button>
-          </div>
-        ) : null}
-        {deleteError ? <p className="mt-2 text-sm text-danger-text">{deleteError}</p> : null}
-      </div>
-
-      <ConfirmDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title="Order this gig?"
-        description={`You're about to order "${gig.title}" for $${gig.price}. You'll be asked to pay right after.`}
-        confirmLabel="Order now"
-        cancelLabel="Not yet"
-        loading={ordering}
-        onConfirm={handleConfirmOrder}
-      />
-
-      <ConfirmDialog
-        open={deleteConfirmOpen}
-        onOpenChange={setDeleteConfirmOpen}
-        title="Delete this gig?"
-        description={`"${gig.title}" will be permanently removed. This cannot be undone.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        destructive
-        loading={deleting}
-        onConfirm={handleConfirmDelete}
-      />
-    </div>
+    </>
   );
 };
 

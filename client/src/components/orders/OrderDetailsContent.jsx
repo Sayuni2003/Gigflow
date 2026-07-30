@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { AlertTriangle, Pencil, Trash2 } from "lucide-react";
 import {
   completeOrder,
   getOrderById,
@@ -13,6 +13,7 @@ import { deleteRating, getOrderRating } from "../../api/ratingApi";
 import { useAuth } from "../../hooks/useAuth";
 import { ROLES, ROUTES } from "../../utils/constants";
 import { Badge } from "../ui/badge";
+import BackButton from "../ui/BackButton";
 import { Button } from "../ui/button";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import LoadingState from "../ui/LoadingState";
@@ -191,13 +192,9 @@ const OrderDetailsContent = () => {
 
   return (
     <div>
-      <Link
-        to={backRoute}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary"
-      >
-        <ArrowLeft className="size-4" />
+      <BackButton to={backRoute} className="-ml-3">
         Back to orders
-      </Link>
+      </BackButton>
 
       <div className="mt-4 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div>
