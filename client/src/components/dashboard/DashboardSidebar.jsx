@@ -64,9 +64,17 @@ const DashboardSidebar = ({ items, collapsed, onToggleCollapsed }) => {
           className={cn("flex items-center gap-3 rounded-lg px-2 py-2", collapsed && "justify-center px-0")}
           title={collapsed ? `${user?.fullName || "—"} · ${ROLE_LABELS[user?.role] || user?.role || "—"}` : undefined}
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-sm font-semibold text-primary">
-            {getInitials(user?.fullName)}
-          </span>
+          {user?.profilePictureUrl ? (
+            <img
+              src={user.profilePictureUrl}
+              alt=""
+              className="size-9 shrink-0 rounded-full border border-border object-cover"
+            />
+          ) : (
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-sm font-semibold text-primary">
+              {getInitials(user?.fullName)}
+            </span>
+          )}
 
           {collapsed ? null : (
             <div className="min-w-0">

@@ -47,6 +47,10 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const patchUser = useCallback((patch) => {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await authApi.logout();
@@ -83,8 +87,9 @@ export const AuthProvider = ({ children }) => {
       register,
       logout,
       refreshUser,
+      patchUser,
     }),
-    [loading, isAuthenticated, user, login, register, logout, refreshUser],
+    [loading, isAuthenticated, user, login, register, logout, refreshUser, patchUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

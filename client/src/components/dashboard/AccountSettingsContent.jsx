@@ -1,3 +1,4 @@
+import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { onboardFreelancer } from "../../api/paymentApi";
@@ -8,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import LoadingState from "../ui/LoadingState";
+import { Textarea } from "../ui/textarea";
 import ThemeToggle from "../ui/ThemeToggle";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
@@ -16,21 +18,41 @@ import DashboardLayout from "./DashboardLayout";
 
 const FULL_NAME_PATTERN = "^[A-Za-z]+([ '-][A-Za-z]+)*$";
 const MIN_PASSWORD_LENGTH = 8;
+const MAX_BIO_LENGTH = 500;
 const today = new Date().toISOString().split("T")[0];
+
+const getInitials = (fullName) => {
+  if (!fullName) {
+    return "?";
+  }
+
+  return fullName
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+};
 
 const getErrorMessage = (error, fallback) => error?.response?.data?.message || fallback;
 
 const toDateInputValue = (value) => (value ? new Date(value).toISOString().split("T")[0] : "");
 
 const AccountSettingsContent = ({ navItems }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, patchUser } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
+  const isFreelancer = user.role === ROLES.FREELANCER;
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
-  const [profileForm, setProfileForm] = useState({ fullName: "", dateOfBirth: "" });
+  const [profileForm, setProfileForm] = useState({ fullName: "", dateOfBirth: "", bio: "", experience: [] });
+  const [savedExperience, setSavedExperience] = useState([]);
+  const [pictureUrl, setPictureUrl] = useState(null);
+  const [pictureFile, setPictureFile] = useState(null);
+  const [picturePreview, setPicturePreview] = useState("");
+  const [removePicture, setRemovePicture] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState("");
   const [profileSuccess, setProfileSuccess] = useState("");
@@ -62,10 +84,15 @@ const AccountSettingsContent = ({ navItems }) => {
         const profile = response?.data?.data;
 
         if (isMounted && profile) {
+          const experience = Array.isArray(profile.experience) ? profile.experience : [];
           setProfileForm({
             fullName: profile.fullName || "",
             dateOfBirth: toDateInputValue(profile.dateOfBirth),
+            bio: profile.bio || "",
+            experience,
           });
+          setSavedExperience(experience);
+          setPictureUrl(profile.profilePictureUrl || null);
         }
       } catch {
         if (isMounted) {
@@ -90,15 +117,81 @@ const AccountSettingsContent = ({ navItems }) => {
     setProfileForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleExperienceChange = (index, value) => {
+    setProfileForm((prev) => ({
+      ...prev,
+      experience: prev.experience.map((entry, i) => (i === index ? value : entry)),
+    }));
+  };
+
+  const handleAddExperience = () => {
+    setProfileForm((prev) => ({ ...prev, experience: [...prev.experience, ""] }));
+  };
+
+  const handleRemoveExperience = (index) => {
+    setProfileForm((prev) => ({
+      ...prev,
+      experience: prev.experience.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handlePictureChange = (event) => {
+    const file = event.target.files?.[0] || null;
+    setPictureFile(file);
+    setPicturePreview(file ? URL.createObjectURL(file) : "");
+    setRemovePicture(false);
+  };
+
+  const handleRemovePicture = () => {
+    setPictureFile(null);
+    setPicturePreview("");
+    setRemovePicture(true);
+  };
+
   const handleProfileSubmit = async (event) => {
     event.preventDefault();
     setProfileError("");
     setProfileSuccess("");
     setProfileSaving(true);
 
+    const formData = new FormData();
+    formData.append("fullName", profileForm.fullName);
+    formData.append("dateOfBirth", profileForm.dateOfBirth);
+
+    if (isFreelancer) {
+      formData.append("bio", profileForm.bio);
+
+      const trimmedExperience = profileForm.experience.map((entry) => entry.trim()).filter(Boolean);
+      if (trimmedExperience.length > 0) {
+        trimmedExperience.forEach((entry) => formData.append("experience[]", entry));
+      } else if (savedExperience.length > 0) {
+        formData.append("experience[]", "");
+      }
+
+      if (pictureFile) {
+        formData.append("profilePicture", pictureFile);
+      } else if (removePicture) {
+        formData.append("removeProfilePicture", "true");
+      }
+    }
+
     try {
-      await updateUser(user.id, profileForm);
+      const response = await updateUser(user.id, formData);
+      const updated = response?.data?.data;
       setProfileSuccess("Profile updated.");
+      setSavedExperience(profileForm.experience.map((entry) => entry.trim()).filter(Boolean));
+      if (updated) {
+        setPictureUrl(updated.profilePictureUrl ?? null);
+        patchUser({
+          fullName: updated.fullName,
+          bio: updated.bio,
+          experience: Array.isArray(updated.experience) ? updated.experience : [],
+          profilePictureUrl: updated.profilePictureUrl ?? null,
+        });
+      }
+      setPictureFile(null);
+      setPicturePreview("");
+      setRemovePicture(false);
     } catch (error) {
       setProfileError(getErrorMessage(error, "Couldn't update your profile."));
     } finally {
@@ -215,11 +308,54 @@ const AccountSettingsContent = ({ navItems }) => {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Profile</CardTitle>
-              <CardDescription>Update your name and date of birth.</CardDescription>
+              <CardDescription>
+                {isFreelancer
+                  ? "Update your name, photo, bio, and experience."
+                  : "Update your name and date of birth."}
+              </CardDescription>
             </CardHeader>
 
             <CardContent>
               <form id="profile-form" className="grid gap-4" onSubmit={handleProfileSubmit}>
+                {isFreelancer ? (
+                  <div className="grid gap-2">
+                    <Label htmlFor="profilePicture">Profile picture</Label>
+                    <div className="flex items-center gap-4">
+                      {picturePreview || (pictureUrl && !removePicture) ? (
+                        <img
+                          src={picturePreview || pictureUrl}
+                          alt="Profile"
+                          className="size-16 shrink-0 rounded-full border border-border object-cover"
+                        />
+                      ) : (
+                        <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary-soft text-lg font-semibold text-primary">
+                          {getInitials(profileForm.fullName)}
+                        </span>
+                      )}
+
+                      <div className="grid gap-2">
+                        <Input
+                          id="profilePicture"
+                          name="profilePicture"
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePictureChange}
+                          className="max-w-xs"
+                        />
+                        {pictureUrl && !removePicture ? (
+                          <button
+                            type="button"
+                            onClick={handleRemovePicture}
+                            className="w-fit text-sm text-danger-text hover:underline"
+                          >
+                            Remove photo
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="grid gap-2">
                   <Label htmlFor="fullName">Full name</Label>
                   <Input
@@ -246,6 +382,62 @@ const AccountSettingsContent = ({ navItems }) => {
                     required
                   />
                 </div>
+
+                {isFreelancer ? (
+                  <div className="grid gap-2">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea
+                      id="bio"
+                      name="bio"
+                      value={profileForm.bio}
+                      onChange={handleProfileChange}
+                      maxLength={MAX_BIO_LENGTH}
+                      placeholder="Tell clients about yourself..."
+                    />
+                    <p className="text-xs text-text-muted">
+                      {profileForm.bio.length}/{MAX_BIO_LENGTH}
+                    </p>
+                  </div>
+                ) : null}
+
+                {isFreelancer ? (
+                  <div className="grid gap-2">
+                    <Label>Experience</Label>
+                    <div className="grid gap-2">
+                      {profileForm.experience.map((entry, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            value={entry}
+                            onChange={(event) => handleExperienceChange(index, event.target.value)}
+                            placeholder="e.g. 3 years building React apps"
+                            maxLength={200}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleRemoveExperience(index)}
+                            aria-label="Remove experience entry"
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-fit"
+                      onClick={handleAddExperience}
+                      disabled={profileForm.experience.length >= 20}
+                    >
+                      <Plus className="size-4" />
+                      Add experience
+                    </Button>
+                  </div>
+                ) : null}
 
                 {profileError ? <p className="text-sm text-danger-text">{profileError}</p> : null}
                 {profileSuccess ? <p className="text-sm text-success-text">{profileSuccess}</p> : null}

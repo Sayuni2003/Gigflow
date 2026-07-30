@@ -6,7 +6,11 @@ export const getUser = (userId) => {
 };
 
 export const updateUser = (userId, payload) => {
-  return client.patch(USER_ENDPOINTS.byId(userId), payload);
+  const isFormData = payload instanceof FormData;
+
+  return client.patch(USER_ENDPOINTS.byId(userId), payload, {
+    headers: isFormData ? { "Content-Type": undefined } : undefined,
+  });
 };
 
 export const changePassword = (userId, payload) => {
