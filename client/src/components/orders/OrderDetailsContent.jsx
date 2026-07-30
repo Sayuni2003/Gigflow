@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import {
   completeOrder,
   getOrderById,
@@ -9,12 +9,14 @@ import {
   getOrderFreelancer,
   getOrderPayment,
 } from "../../api/orderApi";
+import { deleteRating, getOrderRating } from "../../api/ratingApi";
 import { useAuth } from "../../hooks/useAuth";
 import { ROLES, ROUTES } from "../../utils/constants";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import LoadingState from "../ui/LoadingState";
+import StarRating from "../ui/StarRating";
 import { formatDate } from "../../utils/formatDate";
 import { getOrderStatusClassName, getOrderStatusLabel } from "../../utils/orderStatus";
 import {
@@ -26,6 +28,7 @@ import {
 import DeliverOrderDialog from "./DeliverOrderDialog";
 import DeliveryTimeline from "./DeliveryTimeline";
 import RaiseDisputeDialog from "./RaiseDisputeDialog";
+import RateOrderDialog from "./RateOrderDialog";
 import RequestRevisionDialog from "./RequestRevisionDialog";
 
 const FREELANCER_DELIVERABLE_STATUSES = ["IN_PROGRESS", "REVISION_REQUESTED"];
@@ -36,6 +39,9 @@ const DISPUTE_ELIGIBLE_STATUSES = [
   "DELIVERED",
   "REVISION_REQUESTED",
 ];
+// Mirrors RATEABLE_STATUSES in server/src/services/ratingService.js — a
+// dispute always resolves into one of these two, so both are rateable.
+const RATEABLE_STATUSES = ["COMPLETED", "REFUNDED"];
 
 const OrderDetailsContent = () => {
   const { id } = useParams();
@@ -46,6 +52,7 @@ const OrderDetailsContent = () => {
   const [counterpartyName, setCounterpartyName] = useState(null);
   const [payment, setPayment] = useState(null);
   const [deliveries, setDeliveries] = useState([]);
+  const [rating, setRating] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -55,6 +62,10 @@ const OrderDetailsContent = () => {
   const [completing, setCompleting] = useState(false);
   const [actionError, setActionError] = useState("");
   const [disputeOpen, setDisputeOpen] = useState(false);
+  const [rateOpen, setRateOpen] = useState(false);
+  const [deleteRatingOpen, setDeleteRatingOpen] = useState(false);
+  const [deletingRating, setDeletingRating] = useState(false);
+  const [ratingError, setRatingError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -66,12 +77,13 @@ const OrderDetailsContent = () => {
       try {
         const getCounterparty = isFreelancer ? getOrderClient : getOrderFreelancer;
 
-        const [orderResponse, counterpartyResponse, paymentResponse, deliveriesResponse] =
+        const [orderResponse, counterpartyResponse, paymentResponse, deliveriesResponse, ratingResponse] =
           await Promise.all([
             getOrderById(id),
             getCounterparty(id).catch(() => null),
             getOrderPayment(id).catch(() => null),
             getOrderDeliveries(id).catch(() => null),
+            getOrderRating(id).catch(() => null),
           ]);
 
         if (isMounted) {
@@ -79,6 +91,7 @@ const OrderDetailsContent = () => {
           setCounterpartyName(counterpartyResponse?.data?.data?.fullName || null);
           setPayment(paymentResponse?.data?.data || null);
           setDeliveries(deliveriesResponse?.data?.data || []);
+          setRating(ratingResponse?.data?.data || null);
         }
       } catch {
         if (isMounted) {
@@ -115,6 +128,25 @@ const OrderDetailsContent = () => {
 
   const handleDisputeRaised = () => {
     setOrder((prev) => (prev ? { ...prev, status: "DISPUTED" } : prev));
+  };
+
+  const handleRatingSaved = (savedRating) => {
+    setRating(savedRating);
+  };
+
+  const handleConfirmDeleteRating = async () => {
+    setRatingError("");
+    setDeletingRating(true);
+
+    try {
+      await deleteRating(order._id);
+      setRating(null);
+    } catch (err) {
+      setRatingError(err?.response?.data?.message || "Couldn't delete your rating.");
+    } finally {
+      setDeletingRating(false);
+      setDeleteRatingOpen(false);
+    }
   };
 
   const handleConfirmComplete = async () => {
@@ -256,26 +288,6 @@ const OrderDetailsContent = () => {
             </div>
           ) : null}
 
-          {isFreelancer && FREELANCER_DELIVERABLE_STATUSES.includes(order.status) ? (
-            <div className="border-t border-border pt-4">
-              <Button className="w-full" onClick={() => setDeliverOpen(true)}>
-                {order.status === "REVISION_REQUESTED" ? "Submit revised delivery" : "Submit delivery"}
-              </Button>
-            </div>
-          ) : null}
-
-          {DISPUTE_ELIGIBLE_STATUSES.includes(order.status) ? (
-            <div className="border-t border-border pt-4">
-              <Button
-                variant="outline"
-                className="w-full text-danger-text hover:text-danger-text"
-                onClick={() => setDisputeOpen(true)}
-              >
-                <AlertTriangle className="size-4" />
-                Raise a dispute
-              </Button>
-            </div>
-          ) : null}
         </div>
       </div>
 
@@ -285,6 +297,90 @@ const OrderDetailsContent = () => {
         orderStatus={order.status}
         latestDeliveryActions={clientDeliveryActions}
       />
+
+      {isFreelancer && FREELANCER_DELIVERABLE_STATUSES.includes(order.status) ? (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-bg-card p-6">
+          <div>
+            <h3 className="font-semibold text-text-primary">Ready to deliver?</h3>
+            <p className="mt-1 text-sm text-text-secondary">
+              Upload your work and notify the client.
+            </p>
+          </div>
+          <Button onClick={() => setDeliverOpen(true)}>
+            {order.status === "REVISION_REQUESTED" ? "Submit revised delivery" : "Submit delivery"}
+          </Button>
+        </div>
+      ) : null}
+
+      {DISPUTE_ELIGIBLE_STATUSES.includes(order.status) ? (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-bg-card p-6">
+          <div>
+            <h3 className="font-semibold text-text-primary">Having an issue with this order?</h3>
+            <p className="mt-1 text-sm text-text-secondary">
+              Raising a dispute freezes the order and hands it to an admin for review.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="shrink-0 text-danger-text hover:text-danger-text"
+            onClick={() => setDisputeOpen(true)}
+          >
+            <AlertTriangle className="size-4" />
+            Raise a dispute
+          </Button>
+        </div>
+      ) : null}
+
+      {!isFreelancer && RATEABLE_STATUSES.includes(order.status) ? (
+        <div className="mt-8 rounded-xl border border-border bg-bg-card p-6">
+          <h3 className="font-semibold text-text-primary">Your rating</h3>
+
+          {rating ? (
+            <div className="mt-3 space-y-2">
+              <StarRating value={rating.rating} readOnly />
+              {rating.comment ? (
+                <p className="whitespace-pre-line text-sm text-text-secondary">{rating.comment}</p>
+              ) : null}
+              <div className="flex gap-2 pt-1">
+                <Button size="sm" variant="outline" onClick={() => setRateOpen(true)}>
+                  <Pencil className="size-4" />
+                  Edit
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-danger-text hover:text-danger-text"
+                  onClick={() => setDeleteRatingOpen(true)}
+                >
+                  <Trash2 className="size-4" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
+              <p className="text-sm text-text-secondary">
+                Let the freelancer know how this order went.
+              </p>
+              <Button onClick={() => setRateOpen(true)}>Rate this order</Button>
+            </div>
+          )}
+
+          {ratingError ? <p className="mt-2 text-sm text-danger-text">{ratingError}</p> : null}
+        </div>
+      ) : null}
+
+      {isFreelancer && rating ? (
+        <div className="mt-8 rounded-xl border border-border bg-bg-card p-6">
+          <h3 className="font-semibold text-text-primary">Client feedback</h3>
+          <div className="mt-3 space-y-2">
+            <StarRating value={rating.rating} readOnly />
+            {rating.comment ? (
+              <p className="whitespace-pre-line text-sm text-text-secondary">{rating.comment}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <DeliverOrderDialog
         open={deliverOpen}
@@ -316,6 +412,26 @@ const OrderDetailsContent = () => {
         cancelLabel="Not yet"
         loading={completing}
         onConfirm={handleConfirmComplete}
+      />
+
+      <RateOrderDialog
+        open={rateOpen}
+        onOpenChange={setRateOpen}
+        orderId={order._id}
+        existingRating={rating}
+        onSaved={handleRatingSaved}
+      />
+
+      <ConfirmDialog
+        open={deleteRatingOpen}
+        onOpenChange={setDeleteRatingOpen}
+        title="Delete your rating?"
+        description="This removes your rating and comment from this order. This can't be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        destructive
+        loading={deletingRating}
+        onConfirm={handleConfirmDeleteRating}
       />
     </div>
   );

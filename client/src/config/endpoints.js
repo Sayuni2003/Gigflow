@@ -26,6 +26,7 @@ export const ORDER_ENDPOINTS = {
   requestRevision: (id) => `/orders/${id}/request-revision`,
   complete: (id) => `/orders/${id}/accept`,
   disputes: (id) => `/orders/${id}/disputes`,
+  rating: (id) => `/orders/${id}/rating`,
 };
 
 export const DISPUTE_ENDPOINTS = {
@@ -43,4 +44,5 @@ export const PAYMENT_ENDPOINTS = {
 export const USER_ENDPOINTS = {
   byId: (id) => `/users/${id}`,
   changePassword: (id) => `/users/${id}/change-password`,
+  ratings: (id) => `/users/${id}/ratings`,
 };

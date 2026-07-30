@@ -4,79 +4,70 @@
 
 @theme {
   /* Brand — fixed across themes */
-  --color-primary:       #7F00FF;
-  --color-primary-hover: #6600CC;
+  --color-primary: #5b4bff;
+  --color-primary-hover: #4938e6;
 
   /* Accent — Amber CTA, fixed across themes */
-  --color-cta:           #FFC107;
-  --color-cta-hover:     #E6AC00;
-  --color-cta-text:      #4A3500;
+  --color-cta: #ffc107;
+  --color-cta-hover: #e6ac00;
+  --color-cta-text: #4a3500;
 
   /* Status colors — fixed across themes */
-  --color-danger:        #FF6B6B;
-  --color-success:       #2ECC71;
-  --color-warning:       #FFA726;
+  --color-danger: #ff6b6b;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
 
   /*
-   * Theme-aware tokens: each is set once here for light mode, then
-   * re-pointed to a dark value inside `.dark` below. Components should
-   * only ever reach for these semantic names (bg-bg-main, text-text-primary,
-   * border-border, ...) — never a light/dark-specific name — so nothing
-   * needs its own `dark:` variant just to follow the active theme.
+   * Theme-aware tokens
    */
 
   /* Backgrounds */
-  --color-bg-main: #FAF7FF;
-  --color-bg-card: #FFFFFF;
-  --color-bg-soft: #F0E5FF;
-  --color-bg-nav:  #FFFFFF;
+  --color-bg-main: #f8f9fc;
+  --color-bg-card: #ffffff;
+  --color-bg-soft: #eef1ff;
+  --color-bg-nav: #ffffff;
 
   /* Text */
-  --color-text-primary:   #1A0030;
-  --color-text-secondary: #555555;
-  --color-text-muted:     #999999;
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
 
   /* Borders */
-  --color-border:  #E8D8FF;
-  --color-divider: #F0E8FF;
+  --color-border: #e5e7eb;
+  --color-divider: #eef2f7;
 
   /* Role tints */
-  --color-primary-soft:  #F0E5FF;
-  --color-primary-muted: #D5B3FF;
-  --color-danger-soft:   #FFF0F0;
-  --color-danger-text:   #C0392B;
-  --color-success-soft:  #E8F5E9;
-  --color-success-text:  #1B5E20;
-  --color-warning-soft:  #FFF3CD;
-  --color-warning-text:  #4A3500;
+  --color-primary-soft: #eef1ff;
+  --color-primary-muted: #c7d2fe;
+  --color-danger-soft: #fef2f2;
+  --color-danger-text: #dc2626;
+  --color-success-soft: #f0fdf4;
+  --color-success-text: #15803d;
+  --color-warning-soft: #fffbeb;
+  --color-warning-text: #92400e;
 
   /*
-   * shadcn/ui compatibility layer — components installed via the shadcn
-   * CLI (or pasted from shadcn docs) expect this exact set of names. Each
-   * one just points at an existing token above so there's still a single
-   * source of truth per color; nothing here needs a .dark override since
-   * var() resolves against whatever the referenced token equals on the
-   * same element at use-time.
+   * shadcn/ui compatibility layer
    */
-  --color-background:        var(--color-bg-main);
-  --color-foreground:        var(--color-text-primary);
-  --color-card:               var(--color-bg-card);
-  --color-card-foreground:    var(--color-text-primary);
-  --color-popover:            var(--color-bg-card);
+  --color-background: var(--color-bg-main);
+  --color-foreground: var(--color-text-primary);
+  --color-card: var(--color-bg-card);
+  --color-card-foreground: var(--color-text-primary);
+  --color-popover: var(--color-bg-card);
   --color-popover-foreground: var(--color-text-primary);
-  --color-primary-foreground: #FFFFFF;
-  --color-secondary:            var(--color-bg-soft);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-bg-soft);
   --color-secondary-foreground: var(--color-text-primary);
-  --color-muted:            var(--color-bg-soft);
+  --color-muted: var(--color-bg-soft);
   --color-muted-foreground: var(--color-text-muted);
-  --color-accent:            var(--color-bg-soft);
+  --color-accent: var(--color-bg-soft);
   --color-accent-foreground: var(--color-text-primary);
-  --color-destructive:            var(--color-danger);
-  --color-destructive-foreground: #FFFFFF;
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: #ffffff;
   --color-input: var(--color-border);
-  --color-ring:  var(--color-primary);
+  --color-ring: var(--color-primary);
 
-  --radius:    0.625rem;
+  --radius: 0.625rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -87,30 +78,33 @@
   color-scheme: light;
 }
 
-/* Dark mode — re-point the same semantic tokens to their dark values */
+/* Dark mode */
 .dark {
   color-scheme: dark;
 
-  --color-bg-main: #1C1235;
-  --color-bg-card: #130D26;
-  --color-bg-soft: #2E1A5C;
-  --color-bg-nav:  #130D26;
+  --color-bg-main: #0f172a;
+  --color-bg-card: #111827;
+  --color-bg-soft: #1e293b;
+  --color-bg-nav: #111827;
 
-  --color-text-primary:   #F0E8FF;
-  --color-text-secondary: #9988AA;
-  --color-text-muted:     #6655AA;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
 
-  --color-border:  #3A2460;
-  --color-divider: #2E1A5C;
+  --color-border: #334155;
+  --color-divider: #1e293b;
 
-  --color-primary-soft:  #2E1A5C;
-  --color-primary-muted: #CC99FF;
-  --color-danger-soft:   #3D0F0F;
-  --color-danger-text:   #FF8888;
-  --color-success-soft:  #0D2B0D;
-  --color-success-text:  #81C784;
-  --color-warning-soft:  #3D2D00;
-  --color-warning-text:  #FFD966;
+  --color-primary-soft: #1f2a5a;
+  --color-primary-muted: #818cf8;
+
+  --color-danger-soft: #3b1111;
+  --color-danger-text: #fca5a5;
+
+  --color-success-soft: #112a19;
+  --color-success-text: #86efac;
+
+  --color-warning-soft: #3b2a08;
+  --color-warning-text: #fcd34d;
 }
 
 * {
@@ -122,12 +116,6 @@ body {
 }
 
 @layer base {
-  /*
-   * Tailwind v4's Preflight resets border-color to currentColor globally,
-   * not to any theme token — without this, every bare `border` utility
-   * (shadcn's Card, Input, etc. all use one) renders black/dark instead
-   * of the intended border color.
-   */
   * {
     @apply border-border outline-ring/50;
   }
@@ -149,20 +137,44 @@ body {
 
 /* Animations */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.animate-fade-in  { animation: fade-in  180ms ease-out; }
-.animate-scale-in { animation: scale-in 200ms ease-out; }
-.animate-slide-up { animation: slide-up 240ms ease-out; }
+.animate-fade-in {
+  animation: fade-in 180ms ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 200ms ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 240ms ease-out;
+}

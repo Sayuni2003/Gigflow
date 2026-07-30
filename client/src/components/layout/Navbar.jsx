@@ -14,7 +14,7 @@ const Navbar = () => {
 
     try {
       await logout();
-      navigate(ROUTES.login, { replace: true });
+      navigate(ROUTES.home, { replace: true });
     } finally {
       setLoggingOut(false);
     }

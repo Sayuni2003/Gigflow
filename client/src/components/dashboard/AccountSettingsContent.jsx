@@ -8,7 +8,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import LoadingState from "../ui/LoadingState";
+import ThemeToggle from "../ui/ThemeToggle";
 import { useAuth } from "../../hooks/useAuth";
+import { useTheme } from "../../hooks/useTheme";
 import { ROLES, ROUTES } from "../../utils/constants";
 import DashboardLayout from "./DashboardLayout";
 
@@ -22,6 +24,7 @@ const toDateInputValue = (value) => (value ? new Date(value).toISOString().split
 
 const AccountSettingsContent = ({ navItems }) => {
   const { user, logout } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -195,6 +198,20 @@ const AccountSettingsContent = ({ navItems }) => {
 
       {!loading && !loadError ? (
         <div className="mt-8 grid gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Appearance</CardTitle>
+              <CardDescription>Choose how GigFlow looks on this device.</CardDescription>
+            </CardHeader>
+
+            <CardFooter className="items-center justify-between">
+              <p className="text-sm font-medium text-text-primary">
+                {isDark ? "Dark mode" : "Light mode"}
+              </p>
+              <ThemeToggle />
+            </CardFooter>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Profile</CardTitle>

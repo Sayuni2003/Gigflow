@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ClipboardList, DollarSign, PlusCircle, Star } from "lucide-react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
@@ -6,10 +7,38 @@ import StatCard from "../../components/dashboard/StatCard";
 import { FREELANCER_NAV_ITEMS } from "../../config/dashboardNav";
 import { Button } from "../../components/ui/button";
 import { useAuth } from "../../hooks/useAuth";
+import { getFreelancerRatings } from "../../api/ratingApi";
 import { ROUTES } from "../../utils/constants";
 
 const FreelancerDashboardPage = () => {
   const { user } = useAuth();
+  const [ratings, setRatings] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!user?.id) {
+      return undefined;
+    }
+
+    getFreelancerRatings(user.id)
+      .then((response) => {
+        if (isMounted) {
+          setRatings(response?.data?.data || null);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setRatings(null);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]);
+
+  const averageRatingLabel = ratings?.count > 0 ? `${ratings.average} ★` : "—";
 
   return (
     <DashboardLayout navItems={FREELANCER_NAV_ITEMS}>
@@ -27,7 +56,7 @@ const FreelancerDashboardPage = () => {
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard icon={ClipboardList} label="Active gigs" value="0" />
         <StatCard icon={DollarSign} label="Total earnings" value="$0" />
-        <StatCard icon={Star} label="Average rating" value="—" />
+        <StatCard icon={Star} label="Average rating" value={averageRatingLabel} />
       </div>
 
       <div className="mt-10">

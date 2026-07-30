@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Elements } from "@stripe/react-stripe-js";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Star, Trash2 } from "lucide-react";
 import { deleteGig, getGig, getGigFreelancer } from "../../api/gigApi";
 import { createOrder } from "../../api/orderApi";
+import { getFreelancerRatings } from "../../api/ratingApi";
 import { useAuth } from "../../hooks/useAuth";
 import { stripePromise } from "../../lib/stripe";
 import { ROLES, ROUTES } from "../../utils/constants";
+import { formatDate } from "../../utils/formatDate";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import LoadingState from "../ui/LoadingState";
+import StarRating from "../ui/StarRating";
 import CheckoutForm from "../orders/CheckoutForm";
 
 const GigDetailsContent = () => {
@@ -20,6 +23,7 @@ const GigDetailsContent = () => {
 
   const [gig, setGig] = useState(null);
   const [freelancerName, setFreelancerName] = useState(null);
+  const [ratings, setRatings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [ordering, setOrdering] = useState(false);
@@ -43,9 +47,15 @@ const GigDetailsContent = () => {
           getGigFreelancer(id).catch(() => null),
         ]);
 
+        const freelancerId = freelancerResponse?.data?.data?.freelancerId;
+        const ratingsResponse = freelancerId
+          ? await getFreelancerRatings(freelancerId).catch(() => null)
+          : null;
+
         if (isMounted) {
           setGig(gigResponse?.data?.data || null);
           setFreelancerName(freelancerResponse?.data?.data?.fullName || null);
+          setRatings(ratingsResponse?.data?.data || null);
         }
       } catch {
         if (isMounted) {
@@ -136,7 +146,18 @@ const GigDetailsContent = () => {
 
         <Badge className="mt-4 bg-cta text-cta-text">{gig.category}</Badge>
         <h1 className="mt-3 text-3xl font-extrabold text-text-primary sm:text-4xl">{gig.title}</h1>
-        {freelancerName ? <p className="mt-1 text-text-muted">by {freelancerName}</p> : null}
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-text-muted">
+          {freelancerName ? <p>by {freelancerName}</p> : null}
+          {ratings?.count > 0 ? (
+            <p className="flex items-center gap-1 text-sm">
+              <Star className="size-4 fill-current text-warning-text" />
+              <span className="font-medium text-text-primary">{ratings.average}</span>
+              <span>
+                ({ratings.count} {ratings.count === 1 ? "review" : "reviews"})
+              </span>
+            </p>
+          ) : null}
+        </div>
 
         <p className="mt-4 whitespace-pre-line text-text-secondary">{gig.description}</p>
 
@@ -147,6 +168,32 @@ const GigDetailsContent = () => {
                 {tag}
               </Badge>
             ))}
+          </div>
+        ) : null}
+
+        {ratings?.ratings?.length > 0 ? (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold text-text-primary">Reviews</h2>
+            <div className="mt-4 space-y-4">
+              {ratings.ratings.map((entry) => (
+                <div key={entry._id} className="rounded-xl border border-border bg-bg-card p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <StarRating value={entry.rating} readOnly size="sm" />
+                    <span className="text-xs text-text-muted">{formatDate(entry.createdAt)}</span>
+                  </div>
+                  {entry.client?.fullName ? (
+                    <p className="mt-1 text-sm font-medium text-text-primary">
+                      {entry.client.fullName}
+                    </p>
+                  ) : null}
+                  {entry.comment ? (
+                    <p className="mt-1 whitespace-pre-line text-sm text-text-secondary">
+                      {entry.comment}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
           </div>
         ) : null}
       </div>

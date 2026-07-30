@@ -2,7 +2,6 @@ import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "../../hooks/useAuth";
-import ThemeToggle from "../ui/ThemeToggle";
 import { ROUTES } from "../../utils/constants";
 
 const ROLE_LABELS = {
@@ -30,7 +29,7 @@ const DashboardSidebar = ({ items, collapsed, onToggleCollapsed }) => {
 
   const handleLogout = async () => {
     await logout();
-    navigate(ROUTES.login, { replace: true });
+    navigate(ROUTES.home, { replace: true });
   };
 
   return (
@@ -117,15 +116,14 @@ const DashboardSidebar = ({ items, collapsed, onToggleCollapsed }) => {
         )}
       </nav>
 
-      <div className={cn("flex items-center gap-2 border-t border-border p-3", collapsed && "flex-col")}>
-        <ThemeToggle />
+      <div className="border-t border-border p-3">
         <button
           type="button"
           onClick={handleLogout}
           title="Logout"
           className={cn(
-            "flex flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-text-primary hover:bg-bg-soft",
-            collapsed && "flex-none justify-center px-0",
+            "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-text-primary hover:bg-bg-soft",
+            collapsed && "justify-center px-0",
           )}
         >
           <LogOut className="size-4 shrink-0" />
