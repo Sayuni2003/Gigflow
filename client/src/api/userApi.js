@@ -1,6 +1,10 @@
 import client from "./client";
 import { USER_ENDPOINTS } from "../config/endpoints";
 
+export const getUsers = () => {
+  return client.get(USER_ENDPOINTS.base);
+};
+
 export const getUser = (userId) => {
   return client.get(USER_ENDPOINTS.byId(userId));
 };

@@ -42,6 +42,7 @@ export const PAYMENT_ENDPOINTS = {
 };
 
 export const USER_ENDPOINTS = {
+  base: "/users",
   byId: (id) => `/users/${id}`,
   changePassword: (id) => `/users/${id}/change-password`,
   ratings: (id) => `/users/${id}/ratings`,
