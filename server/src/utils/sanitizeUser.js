@@ -1,3 +1,18 @@
+export const sanitizePublicProfile = (userDoc) => {
+  if (!userDoc) {
+    return null;
+  }
+
+  return {
+    userId: userDoc._id.toString(),
+    fullName: userDoc.fullName,
+    role: userDoc.role,
+    bio: userDoc.bio,
+    experience: userDoc.experience,
+    profilePictureUrl: userDoc.profilePictureUrl,
+  };
+};
+
 export const sanitizeUser = (userDoc) => {
   if (!userDoc) {
     return null;

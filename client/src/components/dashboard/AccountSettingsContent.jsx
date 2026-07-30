@@ -14,25 +14,13 @@ import ThemeToggle from "../ui/ThemeToggle";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import { ROLES, ROUTES } from "../../utils/constants";
+import { getInitials } from "../../utils/getInitials";
 import DashboardLayout from "./DashboardLayout";
 
 const FULL_NAME_PATTERN = "^[A-Za-z]+([ '-][A-Za-z]+)*$";
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_BIO_LENGTH = 500;
 const today = new Date().toISOString().split("T")[0];
-
-const getInitials = (fullName) => {
-  if (!fullName) {
-    return "?";
-  }
-
-  return fullName
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-};
 
 const getErrorMessage = (error, fallback) => error?.response?.data?.message || fallback;
 

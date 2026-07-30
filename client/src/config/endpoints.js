@@ -45,4 +45,5 @@ export const USER_ENDPOINTS = {
   byId: (id) => `/users/${id}`,
   changePassword: (id) => `/users/${id}/change-password`,
   ratings: (id) => `/users/${id}/ratings`,
+  publicProfile: (id) => `/users/${id}/public-profile`,
 };

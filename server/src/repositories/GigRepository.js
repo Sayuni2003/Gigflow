@@ -28,6 +28,7 @@ export const findByIdWithFreelancer = (gigId) => {
 export const findWithFilters = async ({
   q,
   category,
+  freelancerId,
   tags,
   minPrice,
   maxPrice,
@@ -44,6 +45,10 @@ export const findWithFilters = async ({
 
   if (category) {
     filter.category = category;
+  }
+
+  if (freelancerId) {
+    filter.freelancerId = freelancerId;
   }
 
   if (tags.length > 0) {

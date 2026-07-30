@@ -5,6 +5,10 @@ export const getUser = (userId) => {
   return client.get(USER_ENDPOINTS.byId(userId));
 };
 
+export const getPublicProfile = (userId) => {
+  return client.get(USER_ENDPOINTS.publicProfile(userId));
+};
+
 export const updateUser = (userId, payload) => {
   const isFormData = payload instanceof FormData;
 

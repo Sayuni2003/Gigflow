@@ -9,6 +9,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { stripePromise } from "../../lib/stripe";
 import { ROLES, ROUTES } from "../../utils/constants";
 import { formatDate } from "../../utils/formatDate";
+import { getInitials } from "../../utils/getInitials";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import ConfirmDialog from "../ui/ConfirmDialog";
@@ -22,6 +23,7 @@ const GigDetailsContent = () => {
   const navigate = useNavigate();
 
   const [gig, setGig] = useState(null);
+  const [freelancerId, setFreelancerId] = useState(null);
   const [freelancerName, setFreelancerName] = useState(null);
   const [ratings, setRatings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,13 +49,14 @@ const GigDetailsContent = () => {
           getGigFreelancer(id).catch(() => null),
         ]);
 
-        const freelancerId = freelancerResponse?.data?.data?.freelancerId;
-        const ratingsResponse = freelancerId
-          ? await getFreelancerRatings(freelancerId).catch(() => null)
+        const gigFreelancerId = freelancerResponse?.data?.data?.freelancerId;
+        const ratingsResponse = gigFreelancerId
+          ? await getFreelancerRatings(gigFreelancerId).catch(() => null)
           : null;
 
         if (isMounted) {
           setGig(gigResponse?.data?.data || null);
+          setFreelancerId(gigFreelancerId || null);
           setFreelancerName(freelancerResponse?.data?.data?.fullName || null);
           setRatings(ratingsResponse?.data?.data || null);
         }
@@ -76,6 +79,11 @@ const GigDetailsContent = () => {
   }, [id]);
 
   const detailsRoute = isAuthenticated ? ROUTES.dashboardGigDetails(id) : ROUTES.gigDetails(id);
+  const freelancerProfileRoute = freelancerId
+    ? isAuthenticated
+      ? ROUTES.dashboardFreelancerProfile(freelancerId)
+      : ROUTES.freelancerProfile(freelancerId)
+    : null;
   const canOrder = !isAuthenticated || user?.role === ROLES.CLIENT;
   const isOwner = user?.role === ROLES.FREELANCER && gig?.freelancerId === user?.id;
 
@@ -147,7 +155,21 @@ const GigDetailsContent = () => {
         <Badge className="mt-4 bg-cta text-cta-text">{gig.category}</Badge>
         <h1 className="mt-3 text-3xl font-extrabold text-text-primary sm:text-4xl">{gig.title}</h1>
         <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-text-muted">
-          {freelancerName ? <p>by {freelancerName}</p> : null}
+          {freelancerName ? (
+            freelancerProfileRoute ? (
+              <Link
+                to={freelancerProfileRoute}
+                className="flex items-center gap-1.5 hover:text-text-primary"
+              >
+                <span className="flex size-5 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
+                  {getInitials(freelancerName)}
+                </span>
+                by {freelancerName}
+              </Link>
+            ) : (
+              <p>by {freelancerName}</p>
+            )
+          ) : null}
           {ratings?.count > 0 ? (
             <p className="flex items-center gap-1 text-sm">
               <Star className="size-4 fill-current text-warning-text" />

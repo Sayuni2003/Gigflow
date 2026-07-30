@@ -9,12 +9,14 @@ import ClientOrdersPage from "../pages/dashboard/ClientOrdersPage";
 import ClientPaymentsPage from "../pages/dashboard/ClientPaymentsPage";
 import ClientSettingsPage from "../pages/dashboard/ClientSettingsPage";
 import DashboardBrowseGigsPage from "../pages/dashboard/DashboardBrowseGigsPage";
+import DashboardFreelancerProfilePage from "../pages/dashboard/DashboardFreelancerProfilePage";
 import DashboardGigDetailsPage from "../pages/dashboard/DashboardGigDetailsPage";
 import FreelancerDashboardPage from "../pages/dashboard/FreelancerDashboardPage";
 import FreelancerEarningsPage from "../pages/dashboard/FreelancerEarningsPage";
 import FreelancerGigFormPage from "../pages/dashboard/FreelancerGigFormPage";
 import FreelancerMyGigsPage from "../pages/dashboard/FreelancerMyGigsPage";
 import FreelancerOrdersPage from "../pages/dashboard/FreelancerOrdersPage";
+import FreelancerProfilePage from "../pages/FreelancerProfilePage";
 import FreelancerSettingsPage from "../pages/dashboard/FreelancerSettingsPage";
 import GigDetailsPage from "../pages/GigDetailsPage";
 import HomePage from "../pages/HomePage";
@@ -39,6 +41,10 @@ export const router = createBrowserRouter([
   {
     path: ROUTES.gigDetails(),
     element: <GigDetailsPage />,
+  },
+  {
+    path: ROUTES.freelancerProfile(),
+    element: <FreelancerProfilePage />,
   },
   {
     path: ROUTES.login,
@@ -101,6 +107,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute roles={[ROLES.CLIENT, ROLES.FREELANCER]}>
         <DashboardGigDetailsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.dashboardFreelancerProfile(),
+    element: (
+      <ProtectedRoute roles={[ROLES.CLIENT, ROLES.FREELANCER]}>
+        <DashboardFreelancerProfilePage />
       </ProtectedRoute>
     ),
   },

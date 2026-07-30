@@ -1,4 +1,5 @@
 import { GIG_CATEGORIES } from "../constants/gigCategories.js";
+import { isValidObjectId } from "../utils/objectId.js";
 
 const normalizeText = (value) =>
   typeof value === "string" ? value.trim() : "";
@@ -220,6 +221,7 @@ export const validateGigFilterQuery = (query) => {
 
   const q = normalizeText(query.q);
   const category = normalizeText(query.category);
+  const freelancerId = normalizeText(query.freelancerId);
   const sort = normalizeText(query.sort) || "newest";
   const minPrice = normalizeQueryNumber(query.minPrice);
   const maxPrice = normalizeQueryNumber(query.maxPrice);
@@ -230,6 +232,10 @@ export const validateGigFilterQuery = (query) => {
 
   if (category && !GIG_CATEGORIES.includes(category)) {
     errors.push({ field: "category", message: "Invalid category selected." });
+  }
+
+  if (freelancerId && !isValidObjectId(freelancerId)) {
+    errors.push({ field: "freelancerId", message: "Invalid freelancer id." });
   }
 
   if (!allowedSorts.includes(sort)) {
@@ -287,6 +293,7 @@ export const validateGigFilterQuery = (query) => {
     value: {
       q,
       category,
+      freelancerId: freelancerId || undefined,
       minPrice,
       maxPrice,
       maxDeliveryDays,

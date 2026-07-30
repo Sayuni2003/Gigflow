@@ -24,6 +24,8 @@ export const ROUTES = {
   browseGigs: "/gigs",
   gigDetails: (id = ":id") => `/gigs/${id}`,
   dashboardGigDetails: (id = ":id") => `/dashboard/gigs/${id}`,
+  freelancerProfile: (id = ":id") => `/freelancers/${id}`,
+  dashboardFreelancerProfile: (id = ":id") => `/dashboard/freelancers/${id}`,
 };
 
 export const ROLES = {

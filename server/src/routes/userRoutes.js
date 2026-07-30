@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   adminDeleteUser,
   deleteOwnUser,
+  getPublicProfile,
   getUserById,
   getUsers,
   patchUserById,
@@ -25,6 +26,7 @@ userRouter.get(
 );
 
 userRouter.get("/:userId/ratings", asyncHandler(getFreelancerRatings));
+userRouter.get("/:userId/public-profile", asyncHandler(getPublicProfile));
 userRouter.get(
   "/:userId",
   authenticate,

@@ -3,24 +3,12 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 import { ROUTES } from "../../utils/constants";
+import { getInitials } from "../../utils/getInitials";
 
 const ROLE_LABELS = {
   ADMIN: "Admin",
   CLIENT: "Client",
   FREELANCER: "Freelancer",
-};
-
-const getInitials = (fullName) => {
-  if (!fullName) {
-    return "?";
-  }
-
-  return fullName
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
 };
 
 const DashboardSidebar = ({ items, collapsed, onToggleCollapsed }) => {

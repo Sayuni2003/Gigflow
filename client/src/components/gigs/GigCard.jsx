@@ -4,6 +4,7 @@ import { getGigFreelancer } from "../../api/gigApi";
 import { createOrder } from "../../api/orderApi";
 import { useAuth } from "../../hooks/useAuth";
 import { ROLES, ROUTES } from "../../utils/constants";
+import { getInitials } from "../../utils/getInitials";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter } from "../ui/card";
@@ -23,6 +24,7 @@ const GigCard = ({ gig }) => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
+  const [freelancerId, setFreelancerId] = useState(null);
   const [freelancerName, setFreelancerName] = useState(null);
   const [ordering, setOrdering] = useState(false);
   const [orderError, setOrderError] = useState("");
@@ -33,11 +35,13 @@ const GigCard = ({ gig }) => {
     getGigFreelancer(_id)
       .then((response) => {
         if (isMounted) {
+          setFreelancerId(response?.data?.data?.freelancerId || null);
           setFreelancerName(response?.data?.data?.fullName || null);
         }
       })
       .catch(() => {
         if (isMounted) {
+          setFreelancerId(null);
           setFreelancerName(null);
         }
       });
@@ -48,7 +52,21 @@ const GigCard = ({ gig }) => {
   }, [_id]);
 
   const detailsRoute = isAuthenticated ? ROUTES.dashboardGigDetails(_id) : ROUTES.gigDetails(_id);
+  const freelancerProfileRoute = freelancerId
+    ? isAuthenticated
+      ? ROUTES.dashboardFreelancerProfile(freelancerId)
+      : ROUTES.freelancerProfile(freelancerId)
+    : null;
   const canOrder = !isAuthenticated || user?.role === ROLES.CLIENT;
+
+  const handleFreelancerClick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (freelancerProfileRoute) {
+      navigate(freelancerProfileRoute);
+    }
+  };
 
   const handleOrderClick = async () => {
     setOrderError("");
@@ -89,7 +107,16 @@ const GigCard = ({ gig }) => {
             {title}
           </h3>
           {freelancerName ? (
-            <p className="text-sm text-text-muted">by {freelancerName}</p>
+            <button
+              type="button"
+              onClick={handleFreelancerClick}
+              className="flex w-fit items-center gap-1.5 text-sm text-text-muted hover:text-text-primary hover:underline"
+            >
+              <span className="flex size-5 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
+                {getInitials(freelancerName)}
+              </span>
+              by {freelancerName}
+            </button>
           ) : null}
           <p className="line-clamp-2 text-sm text-text-secondary">
             {description}
