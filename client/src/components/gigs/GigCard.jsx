@@ -26,6 +26,7 @@ const GigCard = ({ gig }) => {
 
   const [freelancerId, setFreelancerId] = useState(null);
   const [freelancerName, setFreelancerName] = useState(null);
+  const [freelancerPictureUrl, setFreelancerPictureUrl] = useState(null);
   const [ordering, setOrdering] = useState(false);
   const [orderError, setOrderError] = useState("");
 
@@ -37,12 +38,14 @@ const GigCard = ({ gig }) => {
         if (isMounted) {
           setFreelancerId(response?.data?.data?.freelancerId || null);
           setFreelancerName(response?.data?.data?.fullName || null);
+          setFreelancerPictureUrl(response?.data?.data?.profilePictureUrl || null);
         }
       })
       .catch(() => {
         if (isMounted) {
           setFreelancerId(null);
           setFreelancerName(null);
+          setFreelancerPictureUrl(null);
         }
       });
 
@@ -112,9 +115,17 @@ const GigCard = ({ gig }) => {
               onClick={handleFreelancerClick}
               className="flex w-fit items-center gap-1.5 text-sm text-text-muted hover:text-text-primary hover:underline"
             >
-              <span className="flex size-5 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
-                {getInitials(freelancerName)}
-              </span>
+              {freelancerPictureUrl ? (
+                <img
+                  src={freelancerPictureUrl}
+                  alt=""
+                  className="size-5 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
+                  {getInitials(freelancerName)}
+                </span>
+              )}
               by {freelancerName}
             </button>
           ) : null}

@@ -26,6 +26,7 @@ const GigDetailsContent = () => {
   const [gig, setGig] = useState(null);
   const [freelancerId, setFreelancerId] = useState(null);
   const [freelancerName, setFreelancerName] = useState(null);
+  const [freelancerPictureUrl, setFreelancerPictureUrl] = useState(null);
   const [ratings, setRatings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -59,6 +60,7 @@ const GigDetailsContent = () => {
           setGig(gigResponse?.data?.data || null);
           setFreelancerId(gigFreelancerId || null);
           setFreelancerName(freelancerResponse?.data?.data?.fullName || null);
+          setFreelancerPictureUrl(freelancerResponse?.data?.data?.profilePictureUrl || null);
           setRatings(ratingsResponse?.data?.data || null);
         }
       } catch {
@@ -165,9 +167,17 @@ const GigDetailsContent = () => {
                   to={freelancerProfileRoute}
                   className="flex items-center gap-1.5 hover:text-text-primary"
                 >
-                  <span className="flex size-5 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
-                    {getInitials(freelancerName)}
-                  </span>
+                  {freelancerPictureUrl ? (
+                    <img
+                      src={freelancerPictureUrl}
+                      alt=""
+                      className="size-5 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
+                      {getInitials(freelancerName)}
+                    </span>
+                  )}
                   by {freelancerName}
                 </Link>
               ) : (

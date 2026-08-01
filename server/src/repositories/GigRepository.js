@@ -22,7 +22,7 @@ export const findById = (gigId) => {
 };
 
 export const findByIdWithFreelancer = (gigId) => {
-  return Gig.findById(gigId).populate("freelancerId", "fullName");
+  return Gig.findById(gigId).populate("freelancerId", "fullName profilePictureUrl");
 };
 
 export const findWithFilters = async ({
