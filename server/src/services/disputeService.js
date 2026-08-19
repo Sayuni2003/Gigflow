@@ -120,7 +120,7 @@ export const resolveDispute = async ({
 
   if (decision === DISPUTE_STATUSES.REFUND_APPROVED) {
     // Throws (e.g. payment already TRANSFERRED to the freelancer) if the
-    // order is too far along to refund — that error surfaces to the admin.
+    // order is too far along to refund - that error surfaces to the admin.
     await issueRefundForOrder(order);
     nextOrderStatus = ORDER_STATUSES.REFUNDED;
   } else {

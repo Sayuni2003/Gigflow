@@ -22,7 +22,7 @@ export const getPaymentStatusClassName = (status) =>
   PAYMENT_STATUS_CLASSNAMES[status] || "bg-bg-soft text-text-secondary";
 
 // From the freelancer's side, CAPTURED only means the client's payment is
-// held in escrow — the money hasn't reached the freelancer yet, so it can't
+// held in escrow - the money hasn't reached the freelancer yet, so it can't
 // share the client-facing "Paid"/success-green treatment (only TRANSFERRED,
 // the actual payout, should read as final/paid).
 const FREELANCER_PAYMENT_STATUS_LABELS = {

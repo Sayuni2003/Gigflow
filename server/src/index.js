@@ -19,7 +19,7 @@ app.use(
 );
 app.use(cookieParser());
 
-// Must be before express.json() — Stripe signature verification requires the raw body
+// Must be before express.json() - Stripe signature verification requires the raw body
 app.use("/webhooks", webhookRouter);
 
 app.use(express.json());

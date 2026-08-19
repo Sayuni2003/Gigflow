@@ -18,7 +18,7 @@ const OnboardingCompletePage = () => {
         <CheckCircle2 className="mx-auto size-10 text-success-text" />
         <h1 className="mt-4 text-2xl font-bold text-text-primary">Payout setup submitted</h1>
         <p className="mt-2 text-text-secondary">
-          Stripe is verifying your details. This can take a few minutes — you&apos;ll be able to
+          Stripe is verifying your details. This can take a few minutes - you&apos;ll be able to
           receive payouts as soon as it&apos;s confirmed.
         </p>
         <Button asChild className="mt-6">

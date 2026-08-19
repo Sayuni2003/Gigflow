@@ -193,7 +193,7 @@ export const refundPaymentForOrder = async (order) => {
     return;
   }
 
-  // Already released — safe to retry the order transition.
+  // Already released - safe to retry the order transition.
   if (payment.status === PAYMENT_STATUSES.CANCELED) {
     return payment;
   }
@@ -227,13 +227,13 @@ export const issueRefundForOrder = async (order) => {
     throw new ApiError(404, "Payment not found for this order.");
   }
 
-  // Refund already requested — guards against double-refunding a stalled
+  // Refund already requested - guards against double-refunding a stalled
   // order across auto-refund poll cycles before the webhook confirms it.
   if (payment.stripeRefundId) {
     return payment;
   }
 
-  // Once TRANSFERRED, the money has already reached the freelancer — that
+  // Once TRANSFERRED, the money has already reached the freelancer - that
   // needs a clawback, which is out of scope here (same boundary as
   // transferPayoutForOrder's CAPTURED-only guard).
   if (payment.status !== PAYMENT_STATUSES.CAPTURED) {

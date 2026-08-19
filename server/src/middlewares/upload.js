@@ -19,7 +19,7 @@ export const upload = multer({
 });
 
 // Delivery attachments aren't restricted to images (freelancers deliver
-// PDFs, zips, docs, etc.), so no fileFilter here — just a size/count cap.
+// PDFs, zips, docs, etc.), so no fileFilter here - just a size/count cap.
 export const uploadAttachments = multer({
   storage,
   limits: {

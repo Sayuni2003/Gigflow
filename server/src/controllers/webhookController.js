@@ -37,7 +37,7 @@ const handlePaymentAuthorized = async (event) => {
   payment.status = PAYMENT_STATUSES.AUTHORIZED;
   await payment.save();
 
-  // Funds are secured — the order becomes visible/actionable for the freelancer.
+  // Funds are secured - the order becomes visible/actionable for the freelancer.
   await Order.findOneAndUpdate(
     { _id: payment.orderId, status: ORDER_STATUSES.PENDING_PAYMENT },
     { status: ORDER_STATUSES.PENDING_ACCEPTANCE },

@@ -80,7 +80,7 @@ const FreelancerDashboardPage = () => {
     };
   }, [user?.id]);
 
-  const averageRatingLabel = ratings?.count > 0 ? `${ratings.average} ★` : "—";
+  const averageRatingLabel = ratings?.count > 0 ? `${ratings.average} ★` : "-";
 
   return (
     <DashboardLayout navItems={FREELANCER_NAV_ITEMS}>

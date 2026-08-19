@@ -62,7 +62,7 @@ const buildDeliveryDeadline = (deliveryTime) => {
 };
 
 // Shared by the client-initiated /accept endpoint and the auto-complete
-// job — both just need "release payout, mark COMPLETED" once a DELIVERED
+// job - both just need "release payout, mark COMPLETED" once a DELIVERED
 // order is confirmed done, whether a human or the deadline confirmed it.
 const completeOrder = async (order) => {
   await transferPayoutForOrder(order);
@@ -84,7 +84,7 @@ export const createOrder = async ({ gigId, clientId }) => {
   }
 
   // Guard against duplicate PENDING_PAYMENT orders (e.g. a double click on
-  // "Order now") — resume the existing one instead of opening a new charge.
+  // "Order now") - resume the existing one instead of opening a new charge.
   const existingOrder = await orderRepository.findPendingPaymentOrder({
     gigId: gig._id,
     clientId,
@@ -337,7 +337,7 @@ export const requestRevision = async ({ orderId, userId, message }) => {
 
   const updateData = { status: ORDER_STATUSES.REVISION_REQUESTED };
 
-  // Single overwritten field, not an array — a running history of revision
+  // Single overwritten field, not an array - a running history of revision
   // notes belongs to the future messaging feature, not the order document.
   if (message) {
     updateData.lastRevisionNote = message;
@@ -384,7 +384,7 @@ export const autoCompleteExpiredDeliveries = async () => {
       await completeOrder(order);
     } catch (err) {
       // One order's payout guard failing (e.g. freelancer not yet
-      // payout-verified) shouldn't block the rest of the batch — it'll be
+      // payout-verified) shouldn't block the rest of the batch - it'll be
       // retried on the next poll.
       console.error(
         `Auto-complete failed for order ${order._id}:`,
@@ -395,7 +395,7 @@ export const autoCompleteExpiredDeliveries = async () => {
 };
 
 // A freelancer who never delivers by the deadline leaves the client's money
-// captured with nothing to show for it — refund it back automatically
+// captured with nothing to show for it - refund it back automatically
 // instead of leaving the order stuck in IN_PROGRESS forever.
 export const autoRefundStalledOrders = async () => {
   const orders = await orderRepository.findInProgressPastDeadline();
