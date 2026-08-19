@@ -146,5 +146,6 @@ export const getGigFreelancer = async (gigId) => {
   return {
     freelancerId: gig.freelancerId._id,
     fullName: gig.freelancerId.fullName,
+    profilePictureUrl: gig.freelancerId.profilePictureUrl,
   };
 };

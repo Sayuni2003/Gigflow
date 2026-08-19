@@ -1,7 +1,7 @@
 import * as userRepository from "../repositories/UserRepository.js";
 import { ApiError } from "../utils/apiError.js";
 import { isValidObjectId } from "../utils/objectId.js";
-import { sanitizeUser } from "../utils/sanitizeUser.js";
+import { sanitizePublicProfile, sanitizeUser } from "../utils/sanitizeUser.js";
 import { uploadFile, deleteImage } from "./storageService.js";
 import {
   validateChangePasswordInput,
@@ -31,6 +31,18 @@ export const getUserProfileById = async (userId) => {
   }
 
   return sanitizeUser(user);
+};
+
+export const getPublicUserProfile = async (userId) => {
+  assertValidUserId(userId);
+
+  const user = await userRepository.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found.");
+  }
+
+  return sanitizePublicProfile(user);
 };
 
 export const updateUserProfile = async (userId, payload, file) => {

@@ -259,7 +259,24 @@ export const issueRefundForOrder = async (order) => {
   return payment;
 };
 
-export const getPaymentForOrder = async ({ orderId, userId }) => {
+// A PaymentIntent's client_secret stays valid until it's confirmed or
+// canceled, so a still-PENDING payment can be resumed with the same secret
+// instead of creating a new PaymentIntent.
+export const getResumableClientSecret = async (orderId) => {
+  const payment = await paymentRepository.findByOrderId(orderId);
+
+  if (!payment || payment.status !== PAYMENT_STATUSES.PENDING) {
+    return null;
+  }
+
+  const paymentIntent = await stripe.paymentIntents.retrieve(
+    payment.stripePaymentIntentId,
+  );
+
+  return paymentIntent.client_secret;
+};
+
+export const getPaymentForOrder = async ({ orderId, userId, role }) => {
   const payment = await paymentRepository.findByOrderId(orderId);
 
   if (!payment) {
@@ -267,13 +284,23 @@ export const getPaymentForOrder = async ({ orderId, userId }) => {
   }
 
   if (
+    role !== USER_ROLES.ADMIN &&
     payment.clientId.toString() !== userId &&
     payment.freelancerId.toString() !== userId
   ) {
     throw new ApiError(403, "You are not authorized to view this payment.");
   }
 
-  return formatPaymentResponse(payment);
+  const response = formatPaymentResponse(payment);
+
+  if (payment.status === PAYMENT_STATUSES.PENDING) {
+    const paymentIntent = await stripe.paymentIntents.retrieve(
+      payment.stripePaymentIntentId,
+    );
+    response.clientSecret = paymentIntent.client_secret;
+  }
+
+  return response;
 };
 
 export const getPaymentsForUser = async ({ userId, role }) => {

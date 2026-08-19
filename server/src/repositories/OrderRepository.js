@@ -23,6 +23,14 @@ export const getOrderById = (orderId) => {
   return Order.findById(orderId);
 };
 
+export const findPendingPaymentOrder = ({ gigId, clientId }) => {
+  return Order.findOne({
+    gigId,
+    clientId,
+    status: ORDER_STATUSES.PENDING_PAYMENT,
+  });
+};
+
 export const getOrderByIdWithParties = (orderId) => {
   return Order.findById(orderId)
     .populate("clientId", "fullName")

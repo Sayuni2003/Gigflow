@@ -6,6 +6,7 @@ import * as orderRepository from "../repositories/OrderRepository.js";
 import {
   capturePaymentForOrder,
   createPaymentForOrder,
+  getResumableClientSecret,
   issueRefundForOrder,
   refundPaymentForOrder,
   transferPayoutForOrder,
@@ -41,6 +42,7 @@ const formatOrderResponse = (order) => {
     clientId: order.clientId,
     status: order.status,
     deliveryDeadline: order.deliveryDeadline,
+    lastRevisionNote: order.lastRevisionNote,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
   };
@@ -79,6 +81,21 @@ export const createOrder = async ({ gigId, clientId }) => {
 
   if (gig.freelancerId.toString() === clientId) {
     throw new ApiError(403, "Clients cannot order their own gig.");
+  }
+
+  // Guard against duplicate PENDING_PAYMENT orders (e.g. a double click on
+  // "Order now") — resume the existing one instead of opening a new charge.
+  const existingOrder = await orderRepository.findPendingPaymentOrder({
+    gigId: gig._id,
+    clientId,
+  });
+
+  if (existingOrder) {
+    const clientSecret = await getResumableClientSecret(existingOrder._id);
+    const response = formatOrderResponse(existingOrder);
+    response.payment = { clientSecret };
+
+    return response;
   }
 
   const order = await orderRepository.createOrder({
@@ -127,14 +144,14 @@ export const getOrders = async ({ userId, role }) => {
   return orders.map(formatOrderResponse);
 };
 
-export const getSingleOrder = async ({ orderId, userId }) => {
+export const getSingleOrder = async ({ orderId, userId, role }) => {
   const order = await orderRepository.getOrderById(orderId);
 
   if (!order) {
     throw new ApiError(404, "Order not found.");
   }
 
-  if (!isOrderParticipant(order, userId)) {
+  if (role !== USER_ROLES.ADMIN && !isOrderParticipant(order, userId)) {
     throw new ApiError(403, "You are not authorized to access this order.");
   }
 
@@ -173,6 +190,20 @@ export const getOrderFreelancerName = async ({ orderId, userId }) => {
     freelancerId: order.freelancerId._id,
     fullName: order.freelancerId.fullName,
   };
+};
+
+export const getOrderDeliveries = async ({ orderId, userId, role }) => {
+  const order = await orderRepository.getOrderById(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found.");
+  }
+
+  if (role !== USER_ROLES.ADMIN && !isOrderParticipant(order, userId)) {
+    throw new ApiError(403, "You are not authorized to access this order.");
+  }
+
+  return deliveryRepository.getByOrderId(orderId);
 };
 
 export const updateOrderStatus = async ({ orderId, userId, role, status }) => {

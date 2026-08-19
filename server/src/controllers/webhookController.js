@@ -133,6 +133,21 @@ const handlePaymentCanceled = async (event) => {
 
   payment.status = PAYMENT_STATUSES.CANCELED;
   await payment.save();
+
+  // Payment can be canceled out-of-band (Stripe dashboard, manual-capture
+  // auto-expiry) after the order already advanced past PENDING_PAYMENT.
+  // Reconcile the order so it doesn't stay stuck showing actions that can
+  // never succeed. Guarded to unfinished/prepay statuses only, so an order
+  // that already moved on (e.g. IN_PROGRESS) is never clobbered.
+  await Order.findOneAndUpdate(
+    {
+      _id: payment.orderId,
+      status: {
+        $in: [ORDER_STATUSES.PENDING_PAYMENT, ORDER_STATUSES.PENDING_ACCEPTANCE],
+      },
+    },
+    { status: ORDER_STATUSES.CANCELLED },
+  );
 };
 
 const handleRefundCompleted = async (event) => {

@@ -8,5 +8,9 @@ export const mapUser = (rawUser) => {
     role: rawUser.role || "",
     email: rawUser.email || "",
     fullName: rawUser.fullName || "",
+    payoutsEnabled: Boolean(rawUser.payoutsEnabled),
+    bio: rawUser.bio || "",
+    experience: Array.isArray(rawUser.experience) ? rawUser.experience : [],
+    profilePictureUrl: rawUser.profilePictureUrl || null,
   };
 };

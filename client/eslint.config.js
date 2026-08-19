@@ -36,7 +36,7 @@ export default [
       "react/prop-types": "off",
       "react-refresh/only-export-components": [
         "warn",
-        { allowConstantExport: true, allowExportNames: ["AuthContext"] },
+        { allowConstantExport: true, allowExportNames: ["AuthContext", "ThemeContext"] },
       ],
       "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     },

@@ -7,3 +7,7 @@ export const createDelivery = (deliveryData) => {
 export const countByOrderId = (orderId) => {
   return Delivery.countDocuments({ orderId });
 };
+
+export const getByOrderId = (orderId) => {
+  return Delivery.find({ orderId }).sort({ createdAt: -1 });
+};

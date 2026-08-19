@@ -1,6 +1,7 @@
 import {
   adminSoftDeleteUser,
   changeUserPassword,
+  getPublicUserProfile,
   getUserProfileById,
   listActiveUsers,
   softDeleteOwnAccount,
@@ -24,6 +25,16 @@ export const getUserById = async (req, res) => {
   return sendSuccess(res, {
     statusCode: 200,
     message: "User fetched successfully.",
+    data: user,
+  });
+};
+
+export const getPublicProfile = async (req, res) => {
+  const user = await getPublicUserProfile(req.params.userId);
+
+  return sendSuccess(res, {
+    statusCode: 200,
+    message: "Profile fetched successfully.",
     data: user,
   });
 };

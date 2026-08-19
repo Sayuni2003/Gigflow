@@ -22,15 +22,17 @@ export const findById = (gigId) => {
 };
 
 export const findByIdWithFreelancer = (gigId) => {
-  return Gig.findById(gigId).populate("freelancerId", "fullName");
+  return Gig.findById(gigId).populate("freelancerId", "fullName profilePictureUrl");
 };
 
 export const findWithFilters = async ({
   q,
   category,
+  freelancerId,
   tags,
   minPrice,
   maxPrice,
+  maxDeliveryDays,
   sort,
   page,
   limit,
@@ -43,6 +45,10 @@ export const findWithFilters = async ({
 
   if (category) {
     filter.category = category;
+  }
+
+  if (freelancerId) {
+    filter.freelancerId = freelancerId;
   }
 
   if (tags.length > 0) {
@@ -61,6 +67,10 @@ export const findWithFilters = async ({
     if (maxPrice !== undefined) {
       filter.price.$lte = maxPrice;
     }
+  }
+
+  if (maxDeliveryDays !== undefined) {
+    filter.deliveryTime = { $lte: maxDeliveryDays };
   }
 
   const skip = (page - 1) * limit;

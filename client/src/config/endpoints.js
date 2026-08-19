@@ -5,3 +5,46 @@ export const AUTH_ENDPOINTS = {
   refresh: "/auth/refresh",
   logout: "/auth/logout",
 };
+
+export const GIG_ENDPOINTS = {
+  base: "/gigs",
+  categories: "/gigs/categories",
+  myGigs: "/gigs/my-gigs",
+  byId: (id) => `/gigs/${id}`,
+  freelancer: (id) => `/gigs/${id}/freelancer`,
+};
+
+export const ORDER_ENDPOINTS = {
+  base: "/orders",
+  byId: (id) => `/orders/${id}`,
+  freelancer: (id) => `/orders/${id}/freelancer`,
+  client: (id) => `/orders/${id}/client`,
+  payment: (id) => `/orders/${id}/payment`,
+  status: (id) => `/orders/${id}/status`,
+  deliveries: (id) => `/orders/${id}/deliveries`,
+  deliver: (id) => `/orders/${id}/deliver`,
+  requestRevision: (id) => `/orders/${id}/request-revision`,
+  complete: (id) => `/orders/${id}/accept`,
+  disputes: (id) => `/orders/${id}/disputes`,
+  rating: (id) => `/orders/${id}/rating`,
+};
+
+export const DISPUTE_ENDPOINTS = {
+  base: "/disputes",
+  byId: (id) => `/disputes/${id}`,
+  resolve: (id) => `/disputes/${id}/resolve`,
+};
+
+export const PAYMENT_ENDPOINTS = {
+  base: "/payments",
+  onboardFreelancer: "/payments/onboard-freelancer",
+  earnings: "/payments/earnings",
+};
+
+export const USER_ENDPOINTS = {
+  base: "/users",
+  byId: (id) => `/users/${id}`,
+  changePassword: (id) => `/users/${id}/change-password`,
+  ratings: (id) => `/users/${id}/ratings`,
+  publicProfile: (id) => `/users/${id}/public-profile`,
+};
