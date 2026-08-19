@@ -50,7 +50,7 @@ const DashboardSidebar = ({ items, collapsed, onToggleCollapsed }) => {
       <div className="border-b border-border p-3">
         <div
           className={cn("flex items-center gap-3 rounded-lg px-2 py-2", collapsed && "justify-center px-0")}
-          title={collapsed ? `${user?.fullName || "—"} · ${ROLE_LABELS[user?.role] || user?.role || "—"}` : undefined}
+          title={collapsed ? `${user?.fullName || "-"} · ${ROLE_LABELS[user?.role] || user?.role || "-"}` : undefined}
         >
           {user?.profilePictureUrl ? (
             <img
@@ -66,9 +66,9 @@ const DashboardSidebar = ({ items, collapsed, onToggleCollapsed }) => {
 
           {collapsed ? null : (
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-text-primary">{user?.fullName || "—"}</p>
+              <p className="truncate text-sm font-semibold text-text-primary">{user?.fullName || "-"}</p>
               <p className="truncate text-xs text-text-muted">
-                {ROLE_LABELS[user?.role] || user?.role || "—"}
+                {ROLE_LABELS[user?.role] || user?.role || "-"}
               </p>
             </div>
           )}

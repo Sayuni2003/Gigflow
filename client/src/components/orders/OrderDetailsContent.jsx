@@ -40,7 +40,7 @@ const DISPUTE_ELIGIBLE_STATUSES = [
   "DELIVERED",
   "REVISION_REQUESTED",
 ];
-// Mirrors RATEABLE_STATUSES in server/src/services/ratingService.js — a
+// Mirrors RATEABLE_STATUSES in server/src/services/ratingService.js - a
 // dispute always resolves into one of these two, so both are rateable.
 const RATEABLE_STATUSES = ["COMPLETED", "REFUNDED"];
 

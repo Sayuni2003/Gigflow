@@ -172,7 +172,7 @@ const OrderCard = ({ order }) => {
 
       {justPaid ? (
         <p className="border-t border-border p-5 text-sm text-success-text">
-          Payment submitted — awaiting confirmation.
+          Payment submitted - awaiting confirmation.
         </p>
       ) : null}
 

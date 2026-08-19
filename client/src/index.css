@@ -3,16 +3,16 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Brand — fixed across themes */
+  /* Brand - fixed across themes */
   --color-primary: #5b4bff;
   --color-primary-hover: #4938e6;
 
-  /* Accent — Amber CTA, fixed across themes */
+  /* Accent - Amber CTA, fixed across themes */
   --color-cta: #ffc107;
   --color-cta-hover: #e6ac00;
   --color-cta-text: #4a3500;
 
-  /* Status colors — fixed across themes */
+  /* Status colors - fixed across themes */
   --color-danger: #ff6b6b;
   --color-success: #22c55e;
   --color-warning: #f59e0b;

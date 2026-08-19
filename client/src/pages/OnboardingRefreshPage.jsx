@@ -49,7 +49,7 @@ const OnboardingRefreshPage = () => {
             </Button>
           </>
         ) : (
-          <LoadingState label="Your payout setup link expired — starting a new one..." />
+          <LoadingState label="Your payout setup link expired - starting a new one..." />
         )}
       </div>
     </div>
