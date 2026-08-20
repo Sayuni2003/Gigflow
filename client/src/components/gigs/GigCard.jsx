@@ -92,9 +92,9 @@ const GigCard = ({ gig }) => {
   };
 
   return (
-    <Card className="group gap-0 overflow-hidden p-0 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-      <Link to={detailsRoute} className="block">
-        <div className="relative aspect-video w-full overflow-hidden bg-bg-soft">
+    <Card className="group h-full gap-0 overflow-hidden p-0 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+      <Link to={detailsRoute} className="flex flex-1 flex-col">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-bg-soft">
           <img
             src={image}
             alt={title}
@@ -105,8 +105,8 @@ const GigCard = ({ gig }) => {
           </Badge>
         </div>
 
-        <CardContent className="grid gap-2 px-5 pt-4">
-          <h3 className="line-clamp-2 font-semibold text-text-primary">
+        <CardContent className="grid flex-1 auto-rows-min gap-2 px-5 pt-4">
+          <h3 className="line-clamp-2 min-h-12 font-semibold text-text-primary">
             {title}
           </h3>
           {freelancerName ? (
@@ -129,7 +129,7 @@ const GigCard = ({ gig }) => {
               by {freelancerName}
             </button>
           ) : null}
-          <p className="line-clamp-2 text-sm text-text-secondary">
+          <p className="line-clamp-2 min-h-10 text-sm text-text-secondary">
             {description}
           </p>
 
@@ -144,7 +144,7 @@ const GigCard = ({ gig }) => {
           ) : null}
         </CardContent>
 
-        <CardFooter className="mt-3 flex items-center justify-between border-t border-border px-5 py-4">
+        <CardFooter className="mt-3 flex shrink-0 items-center justify-between border-t border-border px-5 py-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-text-muted">
               Delivery
@@ -163,7 +163,7 @@ const GigCard = ({ gig }) => {
       </Link>
 
       {canOrder ? (
-        <div className="px-5 pb-5">
+        <div className="shrink-0 px-5 pb-5">
           <Button type="button" className="w-full" onClick={handleOrderClick} disabled={ordering}>
             {ordering ? "Placing order..." : "Order now"}
           </Button>

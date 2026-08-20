@@ -33,9 +33,9 @@ const MyGigCard = ({ gig, onDeleted }) => {
   };
 
   return (
-    <Card className="group gap-0 overflow-hidden p-0 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-      <Link to={detailsRoute} className="block">
-        <div className="relative aspect-video w-full overflow-hidden bg-bg-soft">
+    <Card className="group h-full gap-0 overflow-hidden p-0 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+      <Link to={detailsRoute} className="flex flex-1 flex-col">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-bg-soft">
           <img
             src={image}
             alt={title}
@@ -44,9 +44,9 @@ const MyGigCard = ({ gig, onDeleted }) => {
           <Badge className="absolute left-3 top-3 bg-cta text-cta-text">{category}</Badge>
         </div>
 
-        <CardContent className="grid gap-2 px-5 pt-4">
-          <h3 className="line-clamp-2 font-semibold text-text-primary">{title}</h3>
-          <p className="line-clamp-2 text-sm text-text-secondary">{description}</p>
+        <CardContent className="grid flex-1 auto-rows-min gap-2 px-5 pt-4">
+          <h3 className="line-clamp-2 min-h-12 font-semibold text-text-primary">{title}</h3>
+          <p className="line-clamp-2 min-h-10 text-sm text-text-secondary">{description}</p>
 
           {tags.length > 0 ? (
             <div className="flex flex-wrap gap-1.5 pt-1">
@@ -59,7 +59,7 @@ const MyGigCard = ({ gig, onDeleted }) => {
           ) : null}
         </CardContent>
 
-        <CardFooter className="mt-3 flex items-center justify-between border-t border-border px-5 py-4">
+        <CardFooter className="mt-3 flex shrink-0 items-center justify-between border-t border-border px-5 py-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-text-muted">Delivery</p>
             <p className="text-sm font-semibold text-text-primary">
@@ -73,7 +73,7 @@ const MyGigCard = ({ gig, onDeleted }) => {
         </CardFooter>
       </Link>
 
-      <div className="flex items-center gap-2 px-5 pb-5">
+      <div className="flex shrink-0 items-center gap-2 px-5 pb-5">
         <Button asChild size="sm" className="flex-1 bg-green-600 text-white hover:bg-green-700">
           <Link to={ROUTES.freelancerGigEdit(_id)}>
             <Pencil className="size-4" />
