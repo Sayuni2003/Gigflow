@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children, roles = [] }) => {
   const location = useLocation();
 
   if (loading) {
-    return <LoadingState label="Restoring session..." />;
+    return <LoadingState label="Restoring session..." fullScreen />;
   }
 
   if (!isAuthenticated) {
