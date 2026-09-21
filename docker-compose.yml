@@ -1,0 +1,38 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  server:
+    build: ./server
+    restart: unless-stopped
+    env_file:
+      - ./server/.env
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/gigflow
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    command: npm run dev
+    volumes:
+      - ./server/src:/app/src
+
+  client:
+    build:
+      context: ./client
+      args:
+        VITE_API_BASE_URL: http://localhost:5000/api
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY:?Set VITE_STRIPE_PUBLISHABLE_KEY in a root .env file (see .env.example)}
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo_data:
